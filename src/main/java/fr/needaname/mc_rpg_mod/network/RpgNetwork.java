@@ -13,7 +13,8 @@ public final class RpgNetwork {
     // À incrémenter à chaque changement de format d'un paquet : un client désynchronisé sera refusé à la connexion.
     // v2 : SyncSkillsPacket + HoldKeyPacket + TriggerPowerPacket.
     // v3 : SyncCategoriesPacket et OpenAdminPacket (état des catégories).
-    private static final String PROTOCOL_VERSION = "3";
+    // v4 : SyncSkillTreesPacket (barèmes serveur → client).
+    private static final String PROTOCOL_VERSION = "4";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(RpgMod.MODID, "main"),
@@ -52,6 +53,11 @@ public final class RpgNetwork {
                 .encoder(OpenAdminPacket::encode)
                 .decoder(OpenAdminPacket::decode)
                 .consumerMainThread(OpenAdminPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncSkillTreesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncSkillTreesPacket::encode)
+                .decoder(SyncSkillTreesPacket::decode)
+                .consumerMainThread(SyncSkillTreesPacket::handle)
                 .add();
     }
 
