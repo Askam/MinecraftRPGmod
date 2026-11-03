@@ -28,6 +28,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -99,8 +100,9 @@ public final class RpgCommands {
                                 }))));
     }
 
+    /** Ops seulement en production ; ouvert à tous dans l'environnement de dev (runClient), même sans cheats. */
     private static LiteralArgumentBuilder<CommandSourceStack> debug(String name) {
-        return Commands.literal(name).requires(source -> source.hasPermission(2));
+        return Commands.literal(name).requires(source -> !FMLEnvironment.production || source.hasPermission(2));
     }
 
     private static int showDeaths(CommandSourceStack source, ServerPlayer target) {
