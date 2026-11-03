@@ -11,7 +11,8 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class RpgNetwork {
     // À incrémenter à chaque changement de format d'un paquet : un client désynchronisé sera refusé à la connexion.
-    private static final String PROTOCOL_VERSION = "1";
+    // v2 : ajout de SyncSkillsPacket (serveur→client) et des paquets client→serveur HoldKey et TriggerPower.
+    private static final String PROTOCOL_VERSION = "2";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(RpgMod.MODID, "main"),
@@ -26,6 +27,21 @@ public final class RpgNetwork {
                 .decoder(SyncDeathStatsPacket::decode)
                 .consumerMainThread(SyncDeathStatsPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(SyncSkillsPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncSkillsPacket::encode)
+                .decoder(SyncSkillsPacket::decode)
+                .consumerMainThread(SyncSkillsPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(HoldKeyPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(HoldKeyPacket::encode)
+                .decoder(HoldKeyPacket::decode)
+                .consumerMainThread(HoldKeyPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(TriggerPowerPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(TriggerPowerPacket::encode)
+                .decoder(TriggerPowerPacket::decode)
+                .consumerMainThread(TriggerPowerPacket::handle)
+                .add();
     }
 
     public static void sendTo(ServerPlayer receiver, Object packet) {
@@ -34,5 +50,10 @@ public final class RpgNetwork {
 
     public static void sendToTrackingAndSelf(Entity entity, Object packet) {
         CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), packet);
+    }
+
+    /** Côté client uniquement (déclencheurs de maintien / de pouvoir) : envoi au serveur. */
+    public static void sendToServer(Object packet) {
+        CHANNEL.sendToServer(packet);
     }
 }

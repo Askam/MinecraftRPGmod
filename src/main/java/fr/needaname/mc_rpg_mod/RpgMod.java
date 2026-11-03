@@ -2,9 +2,10 @@ package fr.needaname.mc_rpg_mod;
 
 import com.mojang.logging.LogUtils;
 import fr.needaname.mc_rpg_mod.command.RpgCommands;
-import fr.needaname.mc_rpg_mod.death.DeathCategoryManager;
 import fr.needaname.mc_rpg_mod.death.DeathStats;
 import fr.needaname.mc_rpg_mod.network.RpgNetwork;
+import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
+import fr.needaname.mc_rpg_mod.skill.player.PlayerSkills;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -31,10 +32,11 @@ public class RpgMod {
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.register(DeathStats.class);
+        event.register(PlayerSkills.class);
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(DeathCategoryManager.INSTANCE);
+        event.addListener(SkillTreeManager.INSTANCE);
     }
 
     private void registerCommands(RegisterCommandsEvent event) {
