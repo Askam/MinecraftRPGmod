@@ -1,6 +1,7 @@
 package fr.needaname.mc_rpg_mod.skill.player;
 
 import fr.needaname.mc_rpg_mod.RpgMod;
+import fr.needaname.mc_rpg_mod.effect.server.AttributeEffects;
 import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import fr.needaname.mc_rpg_mod.skill.model.SkillTree;
 import fr.needaname.mc_rpg_mod.skill.model.XpSource;
@@ -31,6 +32,8 @@ public final class SkillXp {
             skills.setLevel(treeId, result.level());
             skills.setXp(treeId, result.xpIntoLevel());
             if (result.levelsGained() > 0) {
+                // Un palier peut avoir débloqué un effet attribute : sans ça il n'apparaîtrait qu'à la reconnexion.
+                AttributeEffects.reapply(player);
                 RpgMod.LOGGER.debug("{} : +{} niveau(x) en {} (niveau {})",
                         player.getGameProfile().getName(), result.levelsGained(), treeId, result.level());
             }
