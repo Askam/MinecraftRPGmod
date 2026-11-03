@@ -153,6 +153,32 @@ public class PlayerSkills {
         activeTicksSinceDeath = 0;
     }
 
+    // --- Remise à zéro (commande reset) ---
+
+    /** Efface la progression d'un arbre : niveau, XP, nœuds, pouvoirs, recharges et reliquats du bloc. */
+    public void resetTree(String treeId, java.util.Collection<String> treeNodeIds) {
+        levels.remove(treeId);
+        xp.remove(treeId);
+        nodes.removeAll(treeNodeIds);
+        powerSlots.values().removeIf(treeNodeIds::contains);
+        cooldowns.keySet().removeIf(treeNodeIds::contains);
+        accumulators.keySet().removeIf(key -> key.startsWith(treeId + "/"));
+    }
+
+    /**
+     * Efface toute la progression. Les bases de statistiques sont conservées : sans elles, les sources
+     * « stat » cumulatives recrèditeraient rétroactivement tout le kilométrage déjà parcouru.
+     */
+    public void resetAll() {
+        levels.clear();
+        xp.clear();
+        nodes.clear();
+        powerSlots.clear();
+        cooldowns.clear();
+        accumulators.clear();
+        activeTicksSinceDeath = 0;
+    }
+
     // --- Recopie (respawn / retour de dimension, voir PlayerEvent.Clone) ---
 
     public void copyFrom(PlayerSkills other) {

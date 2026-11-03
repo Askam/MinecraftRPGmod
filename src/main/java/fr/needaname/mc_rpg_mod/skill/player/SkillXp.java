@@ -43,6 +43,26 @@ public final class SkillXp {
     }
 
     /**
+     * Fixe la progression d'un arbre à une XP totale (commandes d'administration) en passant par le
+     * même calcul niveau/reliquat que le jeu, puis réapplique les effets et resynchronise — comme une
+     * vraie montée (ou descente) de niveau. {@code deltaXp} peut être négatif.
+     */
+    public static void adjust(ServerPlayer player, String treeId, long deltaXp) {
+        SkillTree tree = SkillTreeManager.INSTANCE.byId(treeId).orElse(null);
+        if (tree == null) {
+            return;
+        }
+        PlayerSkillsProvider.get(player).ifPresent(skills -> {
+            long total = SkillProgression.totalXp(tree.xpCurve(), skills.level(treeId), skills.xp(treeId)) + deltaXp;
+            SkillProgression.Result result = SkillProgression.fromTotal(tree.xpCurve(), tree.maxLevel(), total);
+            skills.setLevel(treeId, result.level());
+            skills.setXp(treeId, result.xpIntoLevel());
+        });
+        AttributeEffects.reapply(player);
+        SkillSyncEvents.syncTo(player);
+    }
+
+    /**
      * Route un événement cumulatif ({@code damage_survived}, {@code heal}) : {@code amount} s'ajoute au
      * reliquat de chaque source {@code on} correspondante, et chaque tranche de {@code per} rapporte son
      * {@code xp}. Le reliquat est conservé (NBT) pour qu'aucune fraction ne se perde.

@@ -43,6 +43,21 @@ class SkillProgressionTest {
     }
 
     @Test
+    void totalXpAndFromTotalRoundTrip() {
+        // Un niveau 12 avec 100 d'XP dans le niveau se reconvertit à l'identique.
+        long total = SkillProgression.totalXp(CURVE, 12, 100);
+        SkillProgression.Result r = SkillProgression.fromTotal(CURVE, MAX, total);
+        assertEquals(12, r.level());
+        assertEquals(100, r.xpIntoLevel());
+    }
+
+    @Test
+    void fromTotalClampsAndCaps() {
+        assertEquals(0, SkillProgression.fromTotal(CURVE, MAX, -500).level());
+        assertEquals(MAX, SkillProgression.fromTotal(CURVE, MAX, Long.MAX_VALUE / 2).level());
+    }
+
+    @Test
     void cappedAtMaxLevel() {
         SkillProgression.Result atMax = SkillProgression.gain(CURVE, MAX, MAX, 0, 100000);
         assertEquals(MAX, atMax.level());

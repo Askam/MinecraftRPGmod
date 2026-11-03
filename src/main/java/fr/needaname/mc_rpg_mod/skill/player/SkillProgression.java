@@ -41,4 +41,35 @@ public final class SkillProgression {
         }
         return new Result(level, xp, gained);
     }
+
+    /** XP cumulée totale correspondant à un niveau + reliquat (somme des coûts de 1..level + reliquat). */
+    public static long totalXp(XpCurve curve, int level, long xpIntoLevel) {
+        long total = Math.max(0, xpIntoLevel);
+        for (int n = 1; n <= level; n++) {
+            total += curve.xpForLevel(n);
+        }
+        return total;
+    }
+
+    /**
+     * Décompose une XP totale en niveau + reliquat. Sert aux commandes d'administration (fixer un
+     * niveau, ajouter/retirer de l'XP) en passant par le même calcul que la progression normale.
+     * {@code levelsGained} porte ici le niveau atteint (pas un delta).
+     */
+    public static Result fromTotal(XpCurve curve, int maxLevel, long totalXp) {
+        long xp = Math.max(0, totalXp);
+        int level = 0;
+        while (level < maxLevel) {
+            long needed = curve.xpForLevel(level + 1);
+            if (needed <= 0 || xp < needed) {
+                break;
+            }
+            xp -= needed;
+            level++;
+        }
+        if (level >= maxLevel) {
+            return new Result(maxLevel, 0L, maxLevel);
+        }
+        return new Result(level, xp, level);
+    }
 }

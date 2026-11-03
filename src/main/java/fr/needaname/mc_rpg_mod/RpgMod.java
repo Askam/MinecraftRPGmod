@@ -1,6 +1,7 @@
 package fr.needaname.mc_rpg_mod;
 
 import com.mojang.logging.LogUtils;
+import fr.needaname.mc_rpg_mod.command.CompetenceCommands;
 import fr.needaname.mc_rpg_mod.command.RpgCommands;
 import fr.needaname.mc_rpg_mod.death.DeathStats;
 import fr.needaname.mc_rpg_mod.network.RpgNetwork;
@@ -41,5 +42,6 @@ public class RpgMod {
 
     private void registerCommands(RegisterCommandsEvent event) {
         RpgCommands.register(event.getDispatcher());
+        CompetenceCommands.register(event.getDispatcher());
     }
 }
