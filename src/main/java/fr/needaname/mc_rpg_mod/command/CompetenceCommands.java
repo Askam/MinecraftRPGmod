@@ -8,9 +8,15 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import fr.needaname.mc_rpg_mod.RpgMod;
+import fr.needaname.mc_rpg_mod.category.CategoryAdmin;
+import fr.needaname.mc_rpg_mod.category.CategorySavedData;
+import fr.needaname.mc_rpg_mod.category.CategoryState;
+import fr.needaname.mc_rpg_mod.category.CategorySyncEvents;
 import fr.needaname.mc_rpg_mod.death.DeathStats;
 import fr.needaname.mc_rpg_mod.death.DeathSyncEvents;
 import fr.needaname.mc_rpg_mod.effect.server.AttributeEffects;
+import fr.needaname.mc_rpg_mod.network.OpenAdminPacket;
+import fr.needaname.mc_rpg_mod.network.RpgNetwork;
 import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import fr.needaname.mc_rpg_mod.skill.model.CauseCounter;
 import fr.needaname.mc_rpg_mod.skill.model.Node;
@@ -23,6 +29,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
@@ -47,6 +54,9 @@ public final class CompetenceCommands {
                     .flatMap(tree -> tree.counters().stream())
                     .flatMap(counters -> counters.perCause().stream())
                     .map(CauseCounter::id), builder);
+    static final SuggestionProvider<CommandSourceStack> STATES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(
+                    java.util.Arrays.stream(CategoryState.values()).map(CategoryState::id), builder);
 
     private CompetenceCommands() {
     }
@@ -76,7 +86,36 @@ public final class CompetenceCommands {
                 .then(Commands.literal("info")
                         .executes(ctx -> info(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("joueur", EntityArgument.player()).requires(op())
-                                .executes(ctx -> info(ctx.getSource(), EntityArgument.getPlayer(ctx, "joueur"))))));
+                                .executes(ctx -> info(ctx.getSource(), EntityArgument.getPlayer(ctx, "joueur")))))
+                .then(Commands.literal("categorie").requires(op())
+                        .then(Commands.argument("arbre", StringArgumentType.word()).suggests(TREES)
+                                .then(Commands.argument("etat", StringArgumentType.word()).suggests(STATES)
+                                        .executes(CompetenceCommands::setCategory))))
+                .then(Commands.literal("admin").requires(op())
+                        .executes(CompetenceCommands::openAdmin)));
+    }
+
+    private static int setCategory(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        MinecraftServer server = ctx.getSource().getServer();
+        SkillTree tree = requireTree(ctx);
+        if (tree == null) {
+            return 0;
+        }
+        CategoryState state = CategoryState.byId(StringArgumentType.getString(ctx, "etat"));
+        CategorySavedData.get(server).setState(tree.id(), state);
+        // Désactiver retire les effets par le même chemin que le reste : reapply sur chaque joueur.
+        server.getPlayerList().getPlayers().forEach(AttributeEffects::reapply);
+        CategorySyncEvents.syncToAll(server);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Catégorie " + tree.id() + " → " + state.id()), true);
+        return 1;
+    }
+
+    private static int openAdmin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        // L'ouverture part du serveur, après la vérification de permission de la commande (requires op).
+        RpgNetwork.sendTo(player, new OpenAdminPacket(CategoryAdmin.payload(ctx.getSource().getServer())));
+        return 1;
     }
 
     private static java.util.function.Predicate<CommandSourceStack> op() {

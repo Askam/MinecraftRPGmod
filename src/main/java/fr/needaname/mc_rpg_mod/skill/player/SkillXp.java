@@ -1,10 +1,12 @@
 package fr.needaname.mc_rpg_mod.skill.player;
 
 import fr.needaname.mc_rpg_mod.RpgMod;
+import fr.needaname.mc_rpg_mod.category.CategorySavedData;
 import fr.needaname.mc_rpg_mod.effect.server.AttributeEffects;
 import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import fr.needaname.mc_rpg_mod.skill.model.SkillTree;
 import fr.needaname.mc_rpg_mod.skill.model.XpSource;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.BiPredicate;
@@ -23,7 +25,7 @@ public final class SkillXp {
             return;
         }
         SkillTree tree = SkillTreeManager.INSTANCE.byId(treeId).orElse(null);
-        if (tree == null) {
+        if (tree == null || isDisabled(player, treeId)) {
             return;
         }
         PlayerSkillsProvider.get(player).ifPresent(skills -> {
@@ -49,7 +51,7 @@ public final class SkillXp {
      */
     public static void adjust(ServerPlayer player, String treeId, long deltaXp) {
         SkillTree tree = SkillTreeManager.INSTANCE.byId(treeId).orElse(null);
-        if (tree == null) {
+        if (tree == null || isDisabled(player, treeId)) {
             return;
         }
         PlayerSkillsProvider.get(player).ifPresent(skills -> {
@@ -60,6 +62,12 @@ public final class SkillXp {
         });
         AttributeEffects.reapply(player);
         SkillSyncEvents.syncTo(player);
+    }
+
+    /** Un arbre désactivé par l'administrateur ne gagne plus d'XP (ni par événement, ni par commande). */
+    private static boolean isDisabled(ServerPlayer player, String treeId) {
+        MinecraftServer server = player.getServer();
+        return server != null && CategorySavedData.get(server).isDisabled(treeId);
     }
 
     /**
