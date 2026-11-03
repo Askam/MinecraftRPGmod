@@ -36,6 +36,8 @@ public class PlayerSkills {
     private final Map<String, Long> cooldowns = new HashMap<>();
     /** Statistique vanilla cumulative → dernière valeur déjà convertie en XP (base des sources « stat »). */
     private final Map<String, Long> statBaselines = new HashMap<>();
+    /** Reliquat des sources d'XP cumulatives à {@code per} (« arbre/on » → quantité pas encore convertie). */
+    private final Map<String, Double> accumulators = new HashMap<>();
     /** Ticks de jeu actif accumulés depuis la dernière mort (seuil de xp_on_death de l'arbre Mort). */
     private int activeTicksSinceDeath;
 
@@ -122,6 +124,21 @@ public class PlayerSkills {
         statBaselines.put(stat, value);
     }
 
+    /** Faux tant que la statistique n'a jamais été relevée pour ce joueur (base de la non-rétroactivité). */
+    public boolean hasStatBaseline(String stat) {
+        return statBaselines.containsKey(stat);
+    }
+
+    // --- Sources d'XP cumulatives à « per » (dégâts survécus, PV régénérés) ---
+
+    public double accumulator(String key) {
+        return accumulators.getOrDefault(key, 0.0);
+    }
+
+    public void setAccumulator(String key, double value) {
+        accumulators.put(key, value);
+    }
+
     // --- Temps de jeu actif depuis la dernière mort (xp_on_death) ---
 
     public int activeTicksSinceDeath() {
@@ -151,6 +168,8 @@ public class PlayerSkills {
         cooldowns.putAll(other.cooldowns);
         statBaselines.clear();
         statBaselines.putAll(other.statBaselines);
+        accumulators.clear();
+        accumulators.putAll(other.accumulators);
         activeTicksSinceDeath = other.activeTicksSinceDeath;
     }
 
@@ -186,6 +205,10 @@ public class PlayerSkills {
         statBaselines.forEach(baselines::putLong);
         tag.put("stat_baselines", baselines);
 
+        CompoundTag accs = new CompoundTag();
+        accumulators.forEach(accs::putDouble);
+        tag.put("accumulators", accs);
+
         tag.putInt("active_ticks_since_death", activeTicksSinceDeath);
 
         return tag;
@@ -198,6 +221,7 @@ public class PlayerSkills {
         powerSlots.clear();
         cooldowns.clear();
         statBaselines.clear();
+        accumulators.clear();
         activeTicksSinceDeath = 0;
 
         CompoundTag trees = tag.getCompound("trees");
@@ -229,6 +253,11 @@ public class PlayerSkills {
         CompoundTag baselines = tag.getCompound("stat_baselines");
         for (String stat : baselines.getAllKeys()) {
             statBaselines.put(stat, baselines.getLong(stat));
+        }
+
+        CompoundTag accs = tag.getCompound("accumulators");
+        for (String key : accs.getAllKeys()) {
+            accumulators.put(key, accs.getDouble(key));
         }
 
         activeTicksSinceDeath = tag.getInt("active_ticks_since_death");

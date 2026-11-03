@@ -43,6 +43,42 @@ public final class SkillXp {
     }
 
     /**
+     * Route un événement cumulatif ({@code damage_survived}, {@code heal}) : {@code amount} s'ajoute au
+     * reliquat de chaque source {@code on} correspondante, et chaque tranche de {@code per} rapporte son
+     * {@code xp}. Le reliquat est conservé (NBT) pour qu'aucune fraction ne se perde.
+     * Les sources portant un {@code filter} ou un {@code require} ne sont pas évaluées ici et sont écartées.
+     */
+    public static void accumulate(ServerPlayer player, String on, double amount) {
+        if (amount <= 0) {
+            return;
+        }
+        PlayerSkills skills = PlayerSkillsProvider.get(player).orElse(null);
+        if (skills == null) {
+            return;
+        }
+        for (SkillTree tree : SkillTreeManager.INSTANCE.trees().values()) {
+            for (XpSource source : tree.xpSources()) {
+                if (!(source instanceof XpSource.Event event) || !event.on().equals(on)
+                        || event.filter().isPresent() || event.require().isPresent()) {
+                    continue;
+                }
+                int per = event.per().orElse(0);
+                if (per <= 0) {
+                    grant(player, tree.id(), event.xp());
+                    continue;
+                }
+                String key = tree.id() + "/" + on;
+                double total = skills.accumulator(key) + amount;
+                long steps = (long) (total / per);
+                skills.setAccumulator(key, total - steps * per);
+                if (steps > 0) {
+                    grant(player, tree.id(), steps * event.xp());
+                }
+            }
+        }
+    }
+
+    /**
      * Route un événement ponctuel : pour chaque arbre et chaque source {@code xp_sources} dont le
      * champ {@code on} correspond et que {@code accept} valide (filtre + require), attribue son XP.
      */

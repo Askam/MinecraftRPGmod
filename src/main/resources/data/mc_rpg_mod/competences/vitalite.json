@@ -7,6 +7,7 @@
   "xp_curve": { "base": 60, "exponent": 1.15 },
   "xp_sources": [
     { "on": "damage_survived", "per": 20, "xp": 6 },
+    { "on": "heal", "per": 20, "xp": 6 },
     { "on": "eat", "xp": 2 },
     { "stat": "minecraft:play_time", "per": 72000, "xp": 20 }
   ],

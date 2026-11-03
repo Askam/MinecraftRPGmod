@@ -20,7 +20,7 @@ recompiler, et pour que le serveur recharge d'un `/reload`.
 | `color` | hex | Couleur de la barre dans l'interface. |
 | `max_level` | entier | 50 pour les dix arbres. |
 | `xp_curve` | objet | `{ base, exponent }` → XP pour passer au niveau *n* = `round(base × n^exponent)`. Avec 60 et 1,15 : 846 au niveau 10, 2 940 au niveau 30, 5 220 au niveau 50. |
-| `xp_sources` | tableau | Ce qui fait monter l'arbre. Deux formes : `{ stat, per, xp }` pour une statistique vanilla cumulative (le pas, et l'XP par pas), ou `{ on, filter?, require?, xp }` pour un événement ponctuel — `break_block`, `harvest_mature`, `plant`, `breed`, `tame`, `shear`, `trade`, `kill`, `ranged_hit`, `shield_block`, `eat`, `damage_survived`, `use_item`, `surface_from_depth`. |
+| `xp_sources` | tableau | Ce qui fait monter l'arbre. Deux formes : `{ stat, per, xp }` pour une statistique vanilla cumulative (le pas, et l'XP par pas), ou `{ on, filter?, require?, xp }` pour un événement ponctuel — `break_block`, `harvest_mature`, `plant`, `breed`, `tame`, `shear`, `trade`, `kill`, `ranged_hit`, `shield_block`, `eat`, `damage_survived`, `heal`, `use_item`, `surface_from_depth`. Un événement peut porter `per` pour s'accumuler : `damage_survived` compte les dégâts bruts (avant armure) des coups non mortels, `heal` les PV réellement rendus, et chaque tranche de `per` rapporte `xp`. Les sources `stat` ne sont pas rétroactives : la première valeur relevée sert de point de départ. |
 | `tiers` | tableau | Les paliers. |
 
 Mort remplace `xp_sources` par `xp_on_death` et ajoute `counters`,

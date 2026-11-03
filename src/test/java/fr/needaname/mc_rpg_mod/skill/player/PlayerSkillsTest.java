@@ -24,6 +24,7 @@ class PlayerSkillsTest {
         s.setPowerSlot("R", "tourbillon");
         s.setLastUsed("tourbillon", 240000L);
         s.setStatBaseline("minecraft:sprint_one_cm", 123456L);
+        s.setAccumulator("vitalite/heal", 7.5);
         s.addActiveTicks(600);
         return s;
     }
@@ -47,6 +48,11 @@ class PlayerSkillsTest {
         assertTrue(reloaded.lastUsed("jamais").isEmpty());
         assertEquals(123456L, reloaded.statBaseline("minecraft:sprint_one_cm"));
         assertEquals(0L, reloaded.statBaseline("minecraft:walk_one_cm"));
+        // Une base absente doit rester distinguable d'une base à 0 : c'est ce qui empêche la rétroactivité.
+        assertTrue(reloaded.hasStatBaseline("minecraft:sprint_one_cm"));
+        assertFalse(reloaded.hasStatBaseline("minecraft:walk_one_cm"));
+        assertEquals(7.5, reloaded.accumulator("vitalite/heal"));
+        assertEquals(0.0, reloaded.accumulator("vitalite/damage_survived"));
         assertEquals(600, reloaded.activeTicksSinceDeath());
     }
 
