@@ -34,6 +34,10 @@ public class PlayerSkills {
     private final Map<String, String> powerSlots = new HashMap<>();
     /** Recharge : id de nœud → {@code gameTime} du dernier usage (la logique est au bloc 9). */
     private final Map<String, Long> cooldowns = new HashMap<>();
+    /** Statistique vanilla cumulative → dernière valeur déjà convertie en XP (base des sources « stat »). */
+    private final Map<String, Long> statBaselines = new HashMap<>();
+    /** Ticks de jeu actif accumulés depuis la dernière mort (seuil de xp_on_death de l'arbre Mort). */
+    private int activeTicksSinceDeath;
 
     // --- Progression ---
 
@@ -108,6 +112,30 @@ public class PlayerSkills {
         return Collections.unmodifiableMap(cooldowns);
     }
 
+    // --- Sources d'XP « stat » : base de conversion par statistique vanilla ---
+
+    public long statBaseline(String stat) {
+        return statBaselines.getOrDefault(stat, 0L);
+    }
+
+    public void setStatBaseline(String stat, long value) {
+        statBaselines.put(stat, value);
+    }
+
+    // --- Temps de jeu actif depuis la dernière mort (xp_on_death) ---
+
+    public int activeTicksSinceDeath() {
+        return activeTicksSinceDeath;
+    }
+
+    public void addActiveTicks(int ticks) {
+        activeTicksSinceDeath += ticks;
+    }
+
+    public void resetActiveTicksSinceDeath() {
+        activeTicksSinceDeath = 0;
+    }
+
     // --- Recopie (respawn / retour de dimension, voir PlayerEvent.Clone) ---
 
     public void copyFrom(PlayerSkills other) {
@@ -121,6 +149,9 @@ public class PlayerSkills {
         powerSlots.putAll(other.powerSlots);
         cooldowns.clear();
         cooldowns.putAll(other.cooldowns);
+        statBaselines.clear();
+        statBaselines.putAll(other.statBaselines);
+        activeTicksSinceDeath = other.activeTicksSinceDeath;
     }
 
     // --- NBT ---
@@ -151,6 +182,12 @@ public class PlayerSkills {
         cooldowns.forEach(cds::putLong);
         tag.put("cooldowns", cds);
 
+        CompoundTag baselines = new CompoundTag();
+        statBaselines.forEach(baselines::putLong);
+        tag.put("stat_baselines", baselines);
+
+        tag.putInt("active_ticks_since_death", activeTicksSinceDeath);
+
         return tag;
     }
 
@@ -160,6 +197,8 @@ public class PlayerSkills {
         nodes.clear();
         powerSlots.clear();
         cooldowns.clear();
+        statBaselines.clear();
+        activeTicksSinceDeath = 0;
 
         CompoundTag trees = tag.getCompound("trees");
         for (String id : trees.getAllKeys()) {
@@ -186,5 +225,12 @@ public class PlayerSkills {
         for (String id : cds.getAllKeys()) {
             cooldowns.put(id, cds.getLong(id));
         }
+
+        CompoundTag baselines = tag.getCompound("stat_baselines");
+        for (String stat : baselines.getAllKeys()) {
+            statBaselines.put(stat, baselines.getLong(stat));
+        }
+
+        activeTicksSinceDeath = tag.getInt("active_ticks_since_death");
     }
 }

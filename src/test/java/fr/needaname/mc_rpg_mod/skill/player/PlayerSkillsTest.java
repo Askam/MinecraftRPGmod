@@ -23,6 +23,8 @@ class PlayerSkillsTest {
         s.addNode("riposte");
         s.setPowerSlot("R", "tourbillon");
         s.setLastUsed("tourbillon", 240000L);
+        s.setStatBaseline("minecraft:sprint_one_cm", 123456L);
+        s.addActiveTicks(600);
         return s;
     }
 
@@ -43,6 +45,9 @@ class PlayerSkillsTest {
         assertTrue(reloaded.powerSlot("G").isEmpty());
         assertEquals(240000L, reloaded.lastUsed("tourbillon").orElseThrow());
         assertTrue(reloaded.lastUsed("jamais").isEmpty());
+        assertEquals(123456L, reloaded.statBaseline("minecraft:sprint_one_cm"));
+        assertEquals(0L, reloaded.statBaseline("minecraft:walk_one_cm"));
+        assertEquals(600, reloaded.activeTicksSinceDeath());
     }
 
     @Test
@@ -59,6 +64,8 @@ class PlayerSkillsTest {
         assertEquals(12, target.level("combat"));
         assertTrue(target.hasNode("poigne"));
         assertEquals("tourbillon", target.powerSlot("R").orElseThrow());
+        assertEquals(123456L, target.statBaseline("minecraft:sprint_one_cm"));
+        assertEquals(600, target.activeTicksSinceDeath());
     }
 
     @Test
