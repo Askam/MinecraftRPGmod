@@ -44,8 +44,9 @@ public final class ClientPacketHandler {
     }
 
     public static void handleOpenAdmin(OpenAdminPacket packet) {
-        // L'écran d'administration relève du handoff 3. Pour l'instant : point d'ancrage.
-        RpgMod.LOGGER.info("Ouverture de l'écran d'administration demandée (écran à venir, handoff 3) : {}", packet.data());
+        // Ouverture décidée par le serveur (après vérif de permission) ; le client ne fait qu'obéir.
+        Minecraft.getInstance().setScreen(
+                new fr.needaname.mc_rpg_mod.client.screen.AdminScreen(packet.data()));
     }
 
     public static void handleSkillTrees(SyncSkillTreesPacket packet) {

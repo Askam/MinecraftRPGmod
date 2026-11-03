@@ -15,7 +15,8 @@ public final class RpgNetwork {
     // v3 : SyncCategoriesPacket et OpenAdminPacket (état des catégories).
     // v4 : SyncSkillTreesPacket (barèmes serveur → client).
     // v5 : ClientReflexPacket (gestes client_* → serveur).
-    private static final String PROTOCOL_VERSION = "5";
+    // v6 : ChooseNodePacket, AssignPowerPacket, SetCategoryPacket (intentions des écrans → serveur).
+    private static final String PROTOCOL_VERSION = "6";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(RpgMod.MODID, "main"),
@@ -64,6 +65,21 @@ public final class RpgNetwork {
                 .encoder(ClientReflexPacket::encode)
                 .decoder(ClientReflexPacket::decode)
                 .consumerMainThread(ClientReflexPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ChooseNodePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ChooseNodePacket::encode)
+                .decoder(ChooseNodePacket::decode)
+                .consumerMainThread(ChooseNodePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(AssignPowerPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(AssignPowerPacket::encode)
+                .decoder(AssignPowerPacket::decode)
+                .consumerMainThread(AssignPowerPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SetCategoryPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SetCategoryPacket::encode)
+                .decoder(SetCategoryPacket::decode)
+                .consumerMainThread(SetCategoryPacket::handle)
                 .add();
     }
 

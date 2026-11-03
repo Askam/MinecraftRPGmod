@@ -1,5 +1,7 @@
 {
   "key.categories.mc_rpg_mod": "MC RPG Mod",
+  "key.mc_rpg_mod.open": "Ouvrir les compétences",
+  "screen.mc_rpg_mod.overview": "Compétences",
   "key.mc_rpg_mod.hold": "Récolte (maintien)",
   "key.mc_rpg_mod.power_r": "Pouvoir — emplacement R",
   "key.mc_rpg_mod.power_g": "Pouvoir — emplacement G",

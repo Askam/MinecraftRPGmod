@@ -19,6 +19,8 @@ import org.lwjgl.glfw.GLFW;
 public final class RpgKeyMappings {
     private static final String CATEGORY = "key.categories." + RpgMod.MODID;
 
+    /** Ouvre la vue d'ensemble des compétences. K est libre en vanilla. */
+    public static final KeyMapping OPEN_SKILLS = new KeyMapping("key." + RpgMod.MODID + ".open", GLFW.GLFW_KEY_K, CATEGORY);
     /** Touche de récolte maintenue (Veinage, Abattage, Moisson, Carrier). */
     public static final KeyMapping HOLD = new KeyMapping("key." + RpgMod.MODID + ".hold", GLFW.GLFW_KEY_C, CATEGORY);
     public static final KeyMapping POWER_R = new KeyMapping("key." + RpgMod.MODID + ".power_r", GLFW.GLFW_KEY_R, CATEGORY);
@@ -30,6 +32,7 @@ public final class RpgKeyMappings {
 
     @SubscribeEvent
     public static void onRegister(RegisterKeyMappingsEvent event) {
+        event.register(OPEN_SKILLS);
         event.register(HOLD);
         event.register(POWER_R);
         event.register(POWER_G);

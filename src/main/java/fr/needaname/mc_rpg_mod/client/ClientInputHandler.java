@@ -48,6 +48,13 @@ public final class ClientInputHandler {
         }
         clientTick++;
 
+        // Ouverture de la vue d'ensemble.
+        while (RpgKeyMappings.OPEN_SKILLS.consumeClick()) {
+            if (mc.screen == null) {
+                mc.setScreen(new fr.needaname.mc_rpg_mod.client.screen.OverviewScreen());
+            }
+        }
+
         // Touche de maintien : on n'envoie qu'au changement d'état, pas à chaque bloc.
         boolean held = RpgKeyMappings.HOLD.isDown();
         if (held != holdDown) {

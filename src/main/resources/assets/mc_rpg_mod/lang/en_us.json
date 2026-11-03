@@ -1,5 +1,7 @@
 {
   "key.categories.mc_rpg_mod": "MC RPG Mod",
+  "key.mc_rpg_mod.open": "Open skills",
+  "screen.mc_rpg_mod.overview": "Skills",
   "key.mc_rpg_mod.hold": "Harvest (hold)",
   "key.mc_rpg_mod.power_r": "Power — slot R",
   "key.mc_rpg_mod.power_g": "Power — slot G",
