@@ -1,5 +1,7 @@
 package fr.needaname.mc_rpg_mod.effect;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import fr.needaname.mc_rpg_mod.skill.model.Filter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +19,21 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class Filters {
     private Filters() {
+    }
+
+    /** Lit un champ {@code filter} (chaîne ou tableau) d'un objet d'effet ; absent → vide. */
+    public static java.util.Optional<Filter> of(JsonObject fields, String key) {
+        if (!fields.has(key) || fields.get(key).isJsonNull()) {
+            return java.util.Optional.empty();
+        }
+        JsonElement element = fields.get(key);
+        java.util.List<String> entries = new java.util.ArrayList<>();
+        if (element.isJsonArray()) {
+            element.getAsJsonArray().forEach(e -> entries.add(e.getAsString()));
+        } else {
+            entries.add(element.getAsString());
+        }
+        return java.util.Optional.of(new Filter(entries));
     }
 
     public static boolean matchesBlock(Filter filter, BlockState state) {

@@ -77,7 +77,7 @@ public final class EffectResolver {
                 if (reached && chosen && requirementMet) {
                     activeOwners.add(node.id());
                     for (Effect effect : node.effects()) {
-                        out.add(new ActiveEffect(node.id(), effect, false));
+                        out.add(new ActiveEffect(node.id(), effect, false, node.trigger()));
                     }
                 }
             }
@@ -87,7 +87,7 @@ public final class EffectResolver {
             if (progress.causeCount(branch.cause()) >= branch.threshold()) {
                 activeOwners.add(branch.id());
                 for (Effect effect : branch.effects()) {
-                    out.add(new ActiveEffect(branch.id(), effect, true));
+                    out.add(new ActiveEffect(branch.id(), effect, true, branch.trigger()));
                 }
             }
         }
