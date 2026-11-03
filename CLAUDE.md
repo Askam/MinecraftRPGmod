@@ -90,6 +90,9 @@ restent valables).
 
 - `mort.json`, compteur `creeper` : déclaré avec `damage_type: minecraft:explosion`, il ne matchera
   jamais (voir piège ci-dessus). À corriger dans le barème, décision du propriétaire.
+- `docs/SCHEMA.md`, `xp_curve` : les exemples (846 / 2 940 / 5 220 aux niveaux 10 / 30 / 50) ne
+  correspondent pas à la formule donnée `round(60 × n^1.15)`, qui donne 848 / 2 998 / 5 395. La
+  formule fait foi tant que le propriétaire n'a pas dit autre chose.
 - `bucheronnage.json` référence l'item `mc_rpg_mod:resine`, qui n'est pas encore enregistré.
 - `break_shape` : `minage.json` utilise `shape: "column"` (Carrier, `max_blocks: 3`), mais
   `docs/SCHEMA.md` ne liste que `vein`, `tree`, `area`. Les quatre formes sont à implémenter ; la doc
