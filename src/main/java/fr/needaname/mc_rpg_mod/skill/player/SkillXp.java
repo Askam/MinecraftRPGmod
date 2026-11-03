@@ -35,6 +35,8 @@ public final class SkillXp {
                         player.getGameProfile().getName(), result.levelsGained(), treeId, result.level());
             }
         });
+        // L'interface a besoin de la progression à jour : on renvoie la capability au joueur.
+        SkillSyncEvents.syncTo(player);
     }
 
     /**
