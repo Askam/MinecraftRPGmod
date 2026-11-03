@@ -16,7 +16,8 @@ public final class RpgNetwork {
     // v4 : SyncSkillTreesPacket (barèmes serveur → client).
     // v5 : ClientReflexPacket (gestes client_* → serveur).
     // v6 : ChooseNodePacket, AssignPowerPacket, SetCategoryPacket (intentions des écrans → serveur).
-    private static final String PROTOCOL_VERSION = "6";
+    // v7 : SyncAppearancePacket (drapeaux d'apparence → observateurs).
+    private static final String PROTOCOL_VERSION = "7";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(RpgMod.MODID, "main"),
@@ -80,6 +81,11 @@ public final class RpgNetwork {
                 .encoder(SetCategoryPacket::encode)
                 .decoder(SetCategoryPacket::decode)
                 .consumerMainThread(SetCategoryPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncAppearancePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncAppearancePacket::encode)
+                .decoder(SyncAppearancePacket::decode)
+                .consumerMainThread(SyncAppearancePacket::handle)
                 .add();
     }
 
