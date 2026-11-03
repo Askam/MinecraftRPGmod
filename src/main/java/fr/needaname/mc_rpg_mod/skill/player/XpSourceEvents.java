@@ -4,6 +4,7 @@ import fr.needaname.mc_rpg_mod.RpgMod;
 import fr.needaname.mc_rpg_mod.effect.Filters;
 import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import fr.needaname.mc_rpg_mod.skill.model.XpSource;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -139,7 +140,10 @@ public final class XpSourceEvents {
                 if (!(source instanceof XpSource.Stat stat)) {
                     continue;
                 }
-                ResourceLocation statId = ResourceLocation.tryParse(stat.stat());
+                ResourceLocation parsed = ResourceLocation.tryParse(stat.stat());
+                // Le registre des stats custom indexe ses valeurs par identité : il faut l'instance
+                // enregistrée, pas un ResourceLocation égal (sinon NPE dans Stat.buildName).
+                ResourceLocation statId = parsed == null ? null : BuiltInRegistries.CUSTOM_STAT.get(parsed);
                 if (statId == null || stat.per() <= 0) {
                     continue;
                 }
