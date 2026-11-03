@@ -5,6 +5,7 @@ import fr.needaname.mc_rpg_mod.command.RpgCommands;
 import fr.needaname.mc_rpg_mod.death.DeathCategoryManager;
 import fr.needaname.mc_rpg_mod.death.DeathStats;
 import fr.needaname.mc_rpg_mod.network.RpgNetwork;
+import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -34,6 +35,7 @@ public class RpgMod {
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(SkillTreeManager.INSTANCE);
         event.addListener(DeathCategoryManager.INSTANCE);
     }
 
