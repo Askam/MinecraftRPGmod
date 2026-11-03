@@ -3,6 +3,18 @@
 **Session locale obligatoire.** Tout ce qui suit se juge à l'œil et se teste en
 lançant le jeu. Une session cloud ne peut rien en vérifier.
 
+**Prérequis : le handoff 2b doit être livré**, en particulier son point 3 (les
+barèmes envoyés au client). Les écrans lisent les arbres depuis le registre
+client (`ClientSkillTrees` ou équivalent), **jamais depuis
+`SkillTreeManager.INSTANCE`** : en solo les deux semblent marcher, mais sur le
+serveur dédié seul le registre client est rempli. Teste au moins une fois
+contre un serveur dédié (`./gradlew runServer` + `runClient` connecté en
+`localhost`), pas seulement en solo.
+
+Quand l'écran d'arbre et les touches sont en place, supprime les commandes de
+test `/mc_rpg_mod node`, `slot`, `power` et `hold` (`command/RpgCommands.java`) :
+elles ne servaient qu'à remplacer l'écran et les touches en attendant.
+
 ## Avant de commencer : les maquettes
 
 Quatorze maquettes existent, faites dans Claude Design. **Exporte-les en PNG et

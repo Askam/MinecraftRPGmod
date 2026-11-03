@@ -3,9 +3,27 @@
 Ajout à `HANDOFF-2-cloud.md`. Même session cloud, même règles : rien de
 visuel, aucun client de jeu, et on ne prétend pas avoir testé en jeu.
 
-Ces deux chantiers sont entièrement côté serveur. L'écran d'administration,
+Ces trois chantiers sont entièrement côté serveur. L'écran d'administration,
 lui, est du client et relève du handoff 3 — mais l'état qu'il manipule et la
 commande qui l'ouvre se construisent ici.
+
+## Où en est le code (à lire avant de commencer)
+
+- **Des commandes de test existent déjà** sous `/mc_rpg_mod` (`command/RpgCommands.java`) :
+  `skills`, `deaths`, `xp`, `level`, `node`, `slot`, `power`, `hold`. Elles ont été écrites pour
+  tester en jeu avant l'existence de `/competence`, et `level` comme `node` écrivent directement
+  dans la capability, c'est-à-dire exactement ce que la règle ci-dessous interdit. Quand
+  `/competence` est en place, **supprime `xp`, `level` et `skills`** (remplacés par `xp`,
+  `niveau` et `info`), pour qu'il n'y ait qu'un seul chemin. Garde `deaths` tant que `info`
+  n'affiche pas les compteurs de mort. Garde `node`, `slot`, `power` et `hold` jusqu'à ce que le
+  handoff 3 livre l'écran et les touches : ce sont aujourd'hui les seuls moyens de choisir un nœud
+  exclusif, de placer ou déclencher un pouvoir, et de simuler la touche de maintien.
+- **Il n'existe aucun retrait d'attributs à la déconnexion.** Le seul mécanisme est
+  `AttributeEffects.reapply(player)`, qui retire tous les modificateurs du mod puis remet ceux qui
+  sont actifs. Il est appelé à la connexion, au respawn, au changement de dimension et à chaque
+  montée de niveau (`SkillXp.grant`). « Le même chemin », plus bas, désigne donc **`reapply`** :
+  un arbre désactivé doit simplement ne plus produire d'effets actifs, et `reapply` fait le reste.
+  N'écris pas de second chemin de retrait.
 
 ## 1. Les commandes
 
@@ -57,8 +75,8 @@ Points techniques :
   voyage avec la sauvegarde et se change en jeu. Une valeur de config ne sert
   qu'au premier démarrage d'un monde neuf.
 - Désactiver retire les `AttributeModifier` de l'arbre **par le même chemin**
-  que le retrait à la déconnexion. Un second chemin, c'est l'assurance qu'ils
-  se cumuleront à la réactivation.
+  que le reste, `AttributeEffects.reapply` (voir « Où en est le code »). Un
+  second chemin, c'est l'assurance qu'ils se cumuleront à la réactivation.
 - Le changement est synchronisé à tous les clients connectés : un arbre masqué
   doit disparaître sans reconnexion.
 - `/competence admin` envoie un paquet d'ouverture **depuis le serveur**, après
@@ -67,8 +85,35 @@ Points techniques :
 - Prévois le compte de joueurs par arbre (combien en ont des niveaux, et le
   niveau le plus haut) : l'écran l'affiche avant qu'on coupe quelque chose.
 
+## 3. Les barèmes envoyés au client
+
+Les barèmes sont chargés comme données de serveur (`SkillTreeManager`, un
+`SimpleJsonResourceReloadListener`). **Le client ne les reçoit jamais.** En solo,
+ça passe par hasard : client et serveur intégré partagent le même `INSTANCE`
+statique. Sur un serveur dédié, le client ne connaît ni les noms des arbres, ni
+les paliers, ni les nœuds, ni la courbe d'XP, et tous les écrans du handoff 3
+s'afficheraient vides.
+
+- Un paquet serveur → client porte les arbres chargés, au moins ce que les
+  écrans affichent : id, nom, couleur, `max_level`, `xp_curve`, paliers et nœuds
+  (id, nom, description, `exclusive`, `trigger`, `requires_node`), et pour Mort
+  les branches (cause, seuil) et les apparences (niveau, calque). Le plus simple
+  et le plus sûr est d'envoyer le JSON source de chaque arbre et de le relire
+  côté client avec le **même** `SkillTreeParser` : un seul format, pas de
+  divergence possible.
+- Envoyé à la connexion, et à tous les joueurs connectés après chaque `/reload`
+  (`OnDatapackSyncEvent` couvre les deux cas).
+- Côté client, un registre séparé (`ClientSkillTrees`, par exemple), distinct de
+  `SkillTreeManager.INSTANCE`, qui reste la vérité du serveur. Sans cette
+  séparation, le solo continuerait de masquer le bug.
+- Le client s'en sert pour l'affichage, jamais pour décider : le serveur
+  revérifie tout.
+- Incrémente `PROTOCOL_VERSION`.
+
 ## Vérification
 
+- Un test : la sérialisation des dix barèmes réels vers le paquet, puis leur
+  relecture, redonne des arbres identiques.
 - Des tests sur la commande : donner de l'XP fait franchir un palier et
   débloque le nœud attendu ; `reset` sur un seul arbre ne touche pas aux
   autres.
