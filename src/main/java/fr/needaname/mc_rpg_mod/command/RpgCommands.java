@@ -7,7 +7,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
@@ -34,7 +33,7 @@ public final class RpgCommands {
         }
         source.sendSuccess(() -> Component.literal(name + " : " + stats.getTotal() + " mort(s)"), false);
         stats.getAll().entrySet().stream()
-                .sorted(Map.Entry.<ResourceLocation, Integer>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .forEach(e -> source.sendSuccess(() -> Component.literal("  " + e.getKey() + " : " + e.getValue()), false));
         return stats.getTotal();
     }

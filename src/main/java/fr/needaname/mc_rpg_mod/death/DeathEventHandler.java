@@ -1,16 +1,24 @@
 package fr.needaname.mc_rpg_mod.death;
 
 import fr.needaname.mc_rpg_mod.RpgMod;
-import net.minecraft.resources.ResourceLocation;
+import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
+import fr.needaname.mc_rpg_mod.skill.model.SkillTree;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+/**
+ * Incrémente les compteurs de mort à partir des causes déclarées dans {@code mort.json}
+ * ({@code counters.per_cause}), via {@link DeathCauseClassifier}.
+ */
 @Mod.EventBusSubscriber(modid = RpgMod.MODID)
 public final class DeathEventHandler {
-    private DeathEventHandler() {}
+    private static final String DEATH_TREE = "mort";
+
+    private DeathEventHandler() {
+    }
 
     /**
      * LOWEST et sans receiveCanceled : si un autre mod annule la mort (résurrection, etc.),
@@ -21,7 +29,10 @@ public final class DeathEventHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        ResourceLocation cause = DeathCategoryManager.INSTANCE.classify(event.getSource());
+        String cause = SkillTreeManager.INSTANCE.byId(DEATH_TREE)
+                .flatMap(SkillTree::counters)
+                .map(counters -> DeathCauseClassifier.classify(counters.perCause(), event.getSource()))
+                .orElse(DeathCauseClassifier.FALLBACK);
         DeathStats.get(player).ifPresent(stats -> {
             stats.recordDeath(cause);
             RpgMod.LOGGER.debug("{} died ({}, damage type {}), total {}",
