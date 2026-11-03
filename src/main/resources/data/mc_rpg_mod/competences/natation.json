@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "id": "natation",
+  "name": "Natation",
+  "color": "#5ec8d8",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "stat": "minecraft:swim_one_cm", "per": 1000, "xp": 3 },
+    { "stat": "minecraft:dive_one_cm", "per": 1000, "xp": 4 },
+    { "on": "surface_from_depth", "require": { "depth_over": 20 }, "xp": 10 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "poumons", "name": "Poumons",
+          "description": "Réserve d'air +30 %",
+          "effects": [
+            { "type": "air", "reserve_multiplier": 1.3 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "nageur", "name": "Nageur",
+          "description": "Vitesse de nage +20 %",
+          "effects": [
+            { "type": "movement", "aspect": "swim", "multiplier": 1.2 }
+          ]
+        },
+        {
+          "id": "courant", "name": "Courant",
+          "description": "Une poussée en nageant, sans trident",
+          "trigger": { "family": "reflex", "on": "sprint_while_swimming" },
+          "effects": [
+            {
+              "type": "ability", "action": "impulse",
+              "follow_look_direction": true, "strength": 1.2, "cooldown_ticks": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "plongeur", "name": "Plongeur",
+          "description": "Vue claire sous l'eau",
+          "effects": [
+            { "type": "flag", "flag": "clear_underwater_vision" }
+          ],
+          "_note": "Palier offert, pas un choix : sans lui l'océan est une purge visuelle, shaders ou pas, et ça manque trop à tout le monde pour n'être accordé qu'à la moitié des joueurs."
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "branchies", "name": "Branchies",
+          "description": "Une bulle d'air regagnée toutes les 4 s sous l'eau",
+          "effects": [
+            { "type": "air", "regen_ticks_per_bubble": 80 }
+          ]
+        },
+        {
+          "id": "apnee", "name": "Apnée",
+          "description": "La noyade commence 10 s plus tard et fait moitié moins mal",
+          "effects": [
+            { "type": "air", "drown_delay_ticks": 200, "drown_multiplier": 0.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "enfant_de_l_ocean", "name": "Enfant de l'océan",
+          "description": "Respiration illimitée, nage à la vitesse de la marche, les mobs aquatiques neutres cessent d'attaquer",
+          "effects": [
+            { "type": "flag", "flag": "unlimited_breath" },
+            { "type": "movement", "aspect": "swim", "multiplier": 2.0 },
+            { "type": "flag", "flag": "ignored_by", "entity_tag": "#forge:aquatic_neutral" }
+          ]
+        }
+      ]
+    }
+  ],
+  "_note": "Apnée recoupe la branche noyade de l'arbre de Mort et les deux réductions se cumulent : c'est assumé."
+}

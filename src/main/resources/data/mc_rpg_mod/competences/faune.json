@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "id": "faune",
+  "name": "Faune",
+  "color": "#c9874a",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "breed", "xp": 20 },
+    { "on": "tame", "xp": 60 },
+    { "on": "shear", "xp": 5 },
+    { "on": "trade", "xp": 10 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "eleveur", "name": "Éleveur",
+          "description": "20 % de chance que la reproduction donne plusieurs petits",
+          "trigger": { "family": "reflex", "on": "breed" },
+          "effects": [
+            {
+              "type": "breeding",
+              "table": [
+                { "weight": 1,  "children": 10 },
+                { "weight": 19, "children": 2 },
+                { "weight": 80, "children": 1 }
+              ],
+              "excludes_entity": "minecraft:villager",
+              "_note": "Un seul tirage. Les villageois sont exclus : dix bébés d'un coup feraient sauter le watchdog. Le délai de reproduction vanilla n'est pas touché."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "tondeur", "name": "Tondeur",
+          "description": "La tonte rend le double de laine",
+          "effects": [
+            { "type": "flag", "flag": "shear_bonus", "multiplier": 2.0 }
+          ]
+        },
+        {
+          "id": "trayeur", "name": "Trayeur",
+          "description": "Miel et lait se récoltent sans irriter la ruche",
+          "effects": [
+            { "type": "flag", "flag": "calm_harvest" }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "appel", "name": "Appel",
+          "description": "Les bêtes apprivoisées dans 32 blocs te rejoignent",
+          "trigger": { "family": "power" },
+          "effects": [
+            {
+              "type": "ability", "action": "recall_tamed",
+              "radius": 32, "owned_only": true, "cooldown_ticks": 600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "dressage", "name": "Dressage",
+          "description": "Les compagnons apprivoisés gagnent +20 % de vie et de dégâts",
+          "effects": [
+            { "type": "flag", "flag": "companion_boost", "health_multiplier": 1.2, "damage_multiplier": 1.2 }
+          ]
+        },
+        {
+          "id": "negociant", "name": "Négociant",
+          "description": "Les prix villageois baissent de 20 %, la réputation monte plus vite",
+          "effects": [
+            { "type": "flag", "flag": "trade_discount", "ratio": 0.2 },
+            { "type": "flag", "flag": "reputation_gain", "multiplier": 1.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "lien_bestial", "name": "Lien bestial",
+          "description": "Un compagnon tombe K.-O. et se relève après 1 min au lieu de mourir",
+          "trigger": { "family": "reflex", "on": "companion_lethal_damage" },
+          "effects": [
+            {
+              "type": "flag", "flag": "companion_downed",
+              "revive_ticks": 1200, "max_companions": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

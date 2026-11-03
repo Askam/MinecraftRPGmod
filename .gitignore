@@ -1,0 +1,31 @@
+# gradle
+build/
+.gradle/
+
+# minecraft
+run/
+run-data/
+logs/
+*.log
+
+# idea
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# eclipse
+bin/
+*.launch
+.settings/
+.metadata/
+.classpath
+.project
+eclipse/
+
+# python
+__pycache__/
+
+# Documents de travail locaux (handoffs, copies des barèmes) : la version suivie est dans docs/, tools/ et src/
+DocumentClaude/

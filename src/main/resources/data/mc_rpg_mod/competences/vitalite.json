@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "id": "vitalite",
+  "name": "Vitalité",
+  "color": "#d4a03c",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "damage_survived", "per": 20, "xp": 6 },
+    { "on": "eat", "xp": 2 },
+    { "stat": "minecraft:play_time", "per": 72000, "xp": 20 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "constitution", "name": "Constitution",
+          "description": "+2 points de vie",
+          "effects": [
+            {
+              "type": "attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "addition", "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "estomac_solide", "name": "Estomac solide",
+          "description": "La nourriture rassasie 20 % de plus",
+          "effects": [
+            { "type": "flag", "flag": "food_nutrition", "multiplier": 1.2 }
+          ]
+        },
+        {
+          "id": "souffle", "name": "Souffle",
+          "description": "La faim descend 20 % moins vite en course",
+          "effects": [
+            { "type": "flag", "flag": "exhaustion", "multiplier": 0.8, "when": "sprinting" }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "second_souffle", "name": "Second souffle",
+          "description": "Sous 30 % de vie, rend 4 points sur 5 s",
+          "trigger": { "family": "reflex", "on": "health_below", "require": { "ratio": 0.3 } },
+          "effects": [
+            {
+              "type": "ability", "action": "regen_burst",
+              "heal": 4, "over_ticks": 100, "cooldown_ticks": 2400
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "endurance", "name": "Endurance",
+          "description": "+2 points de vie",
+          "effects": [
+            {
+              "type": "attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "addition", "value": 2
+            }
+          ]
+        },
+        {
+          "id": "metabolisme", "name": "Métabolisme",
+          "description": "Potions et régénération durent 50 % plus longtemps",
+          "effects": [
+            { "type": "flag", "flag": "effect_duration", "multiplier": 1.5, "beneficial_only": true }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "vigueur", "name": "Vigueur",
+          "description": "+4 points de vie, et la régénération naturelle repart dès 14 de nourriture",
+          "effects": [
+            {
+              "type": "attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "addition", "value": 4
+            },
+            { "type": "flag", "flag": "natural_regen_threshold", "value": 14 }
+          ]
+        }
+      ]
+    }
+  ],
+  "_note": "L'arbre complet donne +8 points de vie, soit 4 cœurs. C'est le plafond de tout le mod : au-delà, les boss de Cataclysm ne font plus peur et l'arbre de Mort perd sa raison d'être."
+}

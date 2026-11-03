@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "id": "flore",
+  "name": "Flore",
+  "color": "#7aa05a",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "harvest_mature", "filter": "#minecraft:crops", "xp": 4 },
+    { "on": "plant", "filter": "#minecraft:crops", "xp": 1 },
+    { "on": "use_item", "filter": "minecraft:bone_meal", "xp": 1 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "main_verte", "name": "Main verte",
+          "description": "+1 graine à chaque récolte",
+          "effects": [
+            { "type": "drop_bonus", "filter": "#minecraft:crops", "chance": 1.0, "extra": 1, "seeds_only": true }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "semeur", "name": "Semeur",
+          "description": "La récolte à la main replante aussitôt",
+          "trigger": { "family": "reflex", "on": "harvest_mature" },
+          "effects": [
+            { "type": "flag", "flag": "auto_replant", "consumes_from_drop": true }
+          ]
+        },
+        {
+          "id": "herboriste", "name": "Herboriste",
+          "description": "Les plantes sauvages donnent le double",
+          "effects": [
+            { "type": "drop_bonus", "filter": ["#minecraft:flowers", "#forge:mushrooms", "#minecraft:saplings"], "chance": 1.0, "extra": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "moisson", "name": "Moisson",
+          "description": "Récolte et replante un carré de 3 × 3 de cultures mûres",
+          "trigger": { "family": "hold" },
+          "effects": [
+            {
+              "type": "break_shape", "shape": "area", "size": [3, 1, 3],
+              "filter": "#minecraft:crops", "mature_only": true,
+              "replants": true, "stamina_per_block": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "compost", "name": "Compost",
+          "description": "Le composteur travaille deux fois plus vite",
+          "effects": [
+            { "type": "flag", "flag": "composter_rate", "multiplier": 2.0 }
+          ]
+        },
+        {
+          "id": "greffe", "name": "Greffe",
+          "description": "15 % de chance d'une récolte de qualité : +1 de saturation",
+          "effects": [
+            { "type": "flag", "flag": "quality_harvest", "chance": 0.15, "saturation_bonus": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "floraison", "name": "Floraison",
+          "description": "Fait mûrir les cultures dans 5 blocs",
+          "trigger": { "family": "power" },
+          "effects": [
+            {
+              "type": "ability", "action": "grow_crops",
+              "radius": 5, "growth_stages": 1, "cooldown_ticks": 6000,
+              "_note": "Le plafond de recharge est le garde-fou contre le couplage avec Create: Central Kitchen. Si une ferme automatisée en profite trop, descendre le rayon à 3 avant de toucher à la recharge."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

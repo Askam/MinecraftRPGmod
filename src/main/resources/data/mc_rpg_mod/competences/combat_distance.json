@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "id": "combat_distance",
+  "name": "Combat à distance",
+  "color": "#5a8fa8",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "ranged_hit", "xp": 3 },
+    { "on": "kill", "filter": "#minecraft:monster", "require": { "ranged": true }, "xp": 14 },
+    { "on": "ranged_hit", "require": { "distance_over": 30 }, "xp": 8 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "visee", "name": "Visée",
+          "description": "L'arc se bande 10 % plus vite",
+          "effects": [
+            { "type": "flag", "flag": "draw_speed", "multiplier": 1.1 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "carquois", "name": "Carquois",
+          "description": "10 % de chance de récupérer la flèche tirée",
+          "effects": [
+            { "type": "flag", "flag": "arrow_recovery", "chance": 0.1 }
+          ]
+        },
+        {
+          "id": "tireur_rapide", "name": "Tireur rapide",
+          "description": "L'arbalète se recharge 25 % plus vite",
+          "effects": [
+            { "type": "flag", "flag": "crossbow_reload_speed", "multiplier": 1.25 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "tir_vise", "name": "Tir visé",
+          "description": "Au-delà d'1,5 s de visée, critique garanti qui traverse une cible",
+          "trigger": {
+            "family": "reflex", "on": "bow_release",
+            "require": { "draw_ticks_at_least": 30 }
+          },
+          "effects": [
+            {
+              "type": "ability", "action": "aimed_shot",
+              "guaranteed_crit": true, "pierce": 1, "cooldown_ticks": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "balistique", "name": "Balistique",
+          "description": "Portée utile +25 %, la flèche retombe moins",
+          "effects": [
+            { "type": "flag", "flag": "projectile_velocity", "multiplier": 1.25 },
+            { "type": "flag", "flag": "projectile_gravity", "multiplier": 0.75 }
+          ]
+        },
+        {
+          "id": "empoisonneur", "name": "Empoisonneur",
+          "description": "Les flèches de potion durent 50 % plus longtemps",
+          "effects": [
+            { "type": "flag", "flag": "tipped_arrow_duration", "multiplier": 1.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "volee", "name": "Volée",
+          "description": "Un tir en lance cinq en éventail",
+          "trigger": {
+            "family": "reflex", "on": "bow_release",
+            "require": { "crouching": true }
+          },
+          "effects": [
+            {
+              "type": "ability", "action": "volley",
+              "count": 5, "spread_degrees": 20, "consumes_arrows": 1,
+              "cooldown_ticks": 600
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

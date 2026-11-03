@@ -1,0 +1,4 @@
+{
+  "priority": 30,
+  "killer_types": ["#forge:bosses", "minecraft:ender_dragon", "minecraft:wither", "minecraft:warden"]
+}

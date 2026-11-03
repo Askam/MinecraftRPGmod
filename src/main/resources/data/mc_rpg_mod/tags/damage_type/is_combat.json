@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:player_attack",
+    "minecraft:mob_attack",
+    "minecraft:mob_attack_no_aggro",
+    "minecraft:sting",
+    "minecraft:thorns",
+    "minecraft:sonic_boom",
+    "minecraft:arrow",
+    "minecraft:trident",
+    "minecraft:thrown",
+    "minecraft:mob_projectile",
+    "minecraft:fireball",
+    "minecraft:wither_skull"
+  ]
+}

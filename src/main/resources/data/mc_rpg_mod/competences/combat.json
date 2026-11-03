@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "id": "combat",
+  "name": "Combat",
+  "color": "#c4564e",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "kill", "filter": "#minecraft:monster", "xp": 12 },
+    { "on": "kill", "filter": "#forge:bosses", "xp": 400 },
+    { "on": "shield_block", "xp": 2 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "poigne", "name": "Poigne",
+          "description": "Dégâts de mêlée +5 %",
+          "effects": [
+            {
+              "type": "attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "multiply_total", "value": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "garde", "name": "Garde",
+          "description": "Le bouclier se lève deux fois plus vite",
+          "effects": [
+            { "type": "flag", "flag": "shield_raise_speed", "multiplier": 2.0 }
+          ]
+        },
+        {
+          "id": "fendeur", "name": "Fendeur",
+          "description": "Les coups chargés touchent aussi les ennemis collés à la cible",
+          "trigger": { "family": "reflex", "on": "fully_charged_attack" },
+          "effects": [
+            { "type": "flag", "flag": "cleave", "radius": 1.0, "damage_ratio": 0.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "riposte", "name": "Riposte",
+          "description": "Après un blocage, le coup suivant fait +50 % et étourdit",
+          "trigger": { "family": "reflex", "on": "shield_block" },
+          "effects": [
+            {
+              "type": "ability", "action": "riposte_window",
+              "duration_ticks": 60, "stun_ticks": 20, "cooldown_ticks": 100
+            },
+            {
+              "type": "damage_dealt", "multiplier": 1.5,
+              "when": { "while_flag": "riposte_window" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "bourreau", "name": "Bourreau",
+          "description": "+30 % de dégâts sur une cible sous 30 % de vie",
+          "effects": [
+            {
+              "type": "damage_dealt", "multiplier": 1.3,
+              "when": { "target_health_below": 0.3 }
+            }
+          ]
+        },
+        {
+          "id": "tenace", "name": "Tenace",
+          "description": "−15 % de dégâts reçus en mêlée tant qu'on n'a pas reculé",
+          "effects": [
+            {
+              "type": "damage_taken", "multiplier": 0.85,
+              "when": { "damage_type_tag": "mc_rpg_mod:is_combat", "not_retreating_for_ticks": 20 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "tourbillon", "name": "Tourbillon",
+          "description": "Frappe tout ce qui entoure le joueur",
+          "trigger": { "family": "power" },
+          "effects": [
+            {
+              "type": "ability", "action": "whirlwind",
+              "radius": 3.5, "damage_ratio": 1.0, "knockback": 0.6,
+              "cooldown_ticks": 900
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

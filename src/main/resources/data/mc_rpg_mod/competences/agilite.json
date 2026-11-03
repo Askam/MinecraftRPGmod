@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "id": "agilite",
+  "name": "Agilité",
+  "color": "#a8c850",
+  "max_level": 50,
+
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+
+  "xp_sources": [
+    { "stat": "minecraft:sprint_one_cm", "per": 10000, "xp": 5 },
+    { "stat": "minecraft:walk_one_cm",   "per": 10000, "xp": 1 },
+    { "stat": "minecraft:climb_one_cm",  "per": 1000,  "xp": 4 },
+    { "stat": "minecraft:crouch_one_cm", "per": 1000,  "xp": 1 }
+  ],
+
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "pas_leger",
+          "name": "Pas léger",
+          "description": "Vitesse de marche et de course +5 %",
+          "effects": [
+            {
+              "type": "attribute",
+              "attribute": "minecraft:generic.movement_speed",
+              "operation": "multiply_total",
+              "value": 0.05
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 10,
+      "exclusive": true,
+      "nodes": [
+        {
+          "id": "roulade",
+          "name": "Roulade",
+          "description": "S'accroupir à l'atterrissage retire 7 blocs à la chute",
+          "trigger": {
+            "family": "reflex",
+            "on": "fall",
+            "require": { "crouch_pressed_within_ticks": 5 }
+          },
+          "effects": [
+            { "type": "fall_distance", "subtract_blocks": 7 }
+          ]
+        },
+        {
+          "id": "grimpeur",
+          "name": "Grimpeur",
+          "description": "Échelles et vignes 50 % plus vite, accroche au bord",
+          "effects": [
+            { "type": "movement", "aspect": "climb", "multiplier": 1.5 },
+            { "type": "flag", "flag": "ledge_grab" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "double_saut",
+          "name": "Double saut",
+          "description": "Un second saut en l'air, rechargé au contact du sol",
+          "trigger": {
+            "family": "reflex",
+            "on": "client_jump_airborne",
+            "require": { "not_used_since_ground_contact": true }
+          },
+          "effects": [
+            { "type": "ability", "action": "impulse", "vector": [0, 0.42, 0], "cooldown_ticks": 0 }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 35,
+      "exclusive": true,
+      "nodes": [
+        {
+          "id": "glissade",
+          "name": "Glissade",
+          "description": "En course accroupie, on glisse et on passe sous un bloc",
+          "trigger": { "family": "reflex", "on": "crouch_while_sprinting" },
+          "effects": [
+            { "type": "ability", "action": "slide", "duration_ticks": 16, "cooldown_ticks": 30 },
+            { "type": "flag", "flag": "slide_hitbox" }
+          ]
+        },
+        {
+          "id": "pas_de_l_air",
+          "name": "Pas de l'air",
+          "description": "Un court instant pour sauter après avoir quitté le bord",
+          "effects": [
+            { "type": "flag", "flag": "coyote_time", "ticks": 6 }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "elan",
+          "name": "Élan",
+          "description": "Double appui sur une direction : ruée de 8 blocs, traverse les ennemis",
+          "trigger": {
+            "family": "reflex",
+            "on": "client_double_tap_direction",
+            "require": { "forward_needs_sprinting": true, "max_interval_ticks": 7 }
+          },
+          "effects": [
+            {
+              "type": "ability",
+              "action": "dash",
+              "blocks": 8,
+              "follow_held_direction": true,
+              "phase_through_entities": true,
+              "cooldown_ticks": 160
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

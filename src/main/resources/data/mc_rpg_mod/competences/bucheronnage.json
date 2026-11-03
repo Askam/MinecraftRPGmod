@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "id": "bucheronnage",
+  "name": "Bûcheronnage",
+  "color": "#8b6f47",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "break_block", "filter": "#minecraft:logs", "xp": 3 },
+    { "on": "plant", "filter": "#minecraft:saplings", "xp": 5 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "recolte_rapide", "name": "Récolte rapide",
+          "description": "Vitesse de hache +10 %",
+          "effects": [
+            { "type": "flag", "flag": "dig_speed", "multiplier": 1.1, "tool": "#minecraft:axes" }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "bois_dur", "name": "Bois dur",
+          "description": "Durabilité des haches +15 %",
+          "effects": [
+            { "type": "flag", "flag": "durability", "multiplier": 1.15, "tool": "#minecraft:axes" }
+          ]
+        },
+        {
+          "id": "precision", "name": "Précision",
+          "description": "La hache ne casse plus les feuilles par accident",
+          "effects": [
+            { "type": "flag", "flag": "no_leaf_break" }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "abattage", "name": "Abattage",
+          "description": "Casser la bûche du bas fait tomber l'arbre entier, feuilles comprises",
+          "trigger": { "family": "hold" },
+          "effects": [
+            {
+              "type": "break_shape", "shape": "tree", "max_blocks": 96,
+              "filter": "#minecraft:logs", "also_breaks": "#minecraft:leaves",
+              "stamina_per_block": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "cadence", "name": "Cadence",
+          "description": "Pendant 10 s après un abattage, les arbres suivants ne coûtent pas d'endurance",
+          "requires_node": "abattage",
+          "trigger": { "family": "reflex", "on": "break_shape_completed" },
+          "effects": [
+            {
+              "type": "ability", "action": "stamina_free_window",
+              "duration_ticks": 200, "refreshed_by_repeat": true, "cooldown_ticks": 0
+            }
+          ]
+        },
+        {
+          "id": "seve", "name": "Sève",
+          "description": "Les bûches donnent de la résine, ingrédient de la potion d'oubli",
+          "effects": [
+            { "type": "drop_bonus", "filter": "#minecraft:logs", "chance": 0.25, "item": "mc_rpg_mod:resine", "extra": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "forestier", "name": "Forestier",
+          "description": "Replante l'essence abattue si la pousse est dans l'inventaire",
+          "trigger": { "family": "reflex", "on": "break_shape_completed" },
+          "effects": [
+            { "type": "flag", "flag": "auto_replant", "consumes_from_inventory": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

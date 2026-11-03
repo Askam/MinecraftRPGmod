@@ -1,0 +1,257 @@
+{
+  "schema": 1,
+  "id": "mort",
+  "name": "Mort",
+  "color": "#7d5a9e",
+  "max_level": 50,
+
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+
+  "xp_on_death": {
+    "flat": 150,
+    "requires_active_seconds_since_last_death": 300,
+    "_note": "Tarif fixe. Le délai se compte en temps de jeu actif, pas en temps écoulé : c'est le garde-fou contre le farm de morts, et rien d'autre ne module le gain."
+  },
+
+  "counters": {
+    "total": true,
+    "per_cause": [
+      { "id": "chute",     "damage_type": "minecraft:fall" },
+      { "id": "vide",      "damage_type": "minecraft:out_of_world" },
+      { "id": "brule",     "damage_type_tag": "minecraft:is_fire" },
+      { "id": "noyade",    "damage_type": "minecraft:drown" },
+      { "id": "creeper",   "damage_type": "minecraft:explosion", "source_entity": "minecraft:creeper" },
+      { "id": "explosion", "damage_type_tag": "minecraft:is_explosion", "excluding_source_entity": "minecraft:creeper" }
+    ]
+  },
+
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "memoire_du_corps",
+          "name": "Mémoire du corps",
+          "description": "Conserve 30 % de l'XP vanilla à la mort",
+          "effects": [ { "type": "flag", "flag": "keep_vanilla_xp", "ratio": 0.3 } ]
+        }
+      ]
+    },
+
+    {
+      "level": 10,
+      "nodes": [
+        {
+          "id": "appel_du_corps",
+          "name": "Appel du corps",
+          "description": "La position du cadavre reste affichée",
+          "effects": [ { "type": "flag", "flag": "corpse_waypoint" } ]
+        }
+      ]
+    },
+
+    {
+      "level": 15,
+      "exclusive": true,
+      "nodes": [
+        {
+          "id": "retour_rapide",
+          "name": "Retour rapide",
+          "description": "Respawn accéléré et 3 s d'invulnérabilité",
+          "effects": [
+            { "type": "ability", "action": "respawn_grace", "duration_ticks": 60, "cooldown_ticks": 0 }
+          ]
+        },
+        {
+          "id": "dernier_souffle",
+          "name": "Dernier souffle",
+          "description": "Survit à 1 cœur au lieu de mourir",
+          "trigger": { "family": "reflex", "on": "lethal_damage" },
+          "effects": [
+            { "type": "ability", "action": "cheat_death", "leave_health": 2, "cooldown_ticks": 24000 }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "chair_endurcie",
+          "name": "Chair endurcie",
+          "description": "Dégâts hors combat −10 %",
+          "effects": [
+            {
+              "type": "damage_taken",
+              "multiplier": 0.9,
+              "when": { "not_damage_type_tag": "minecraft:is_player_attack_or_mob_attack" }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 25,
+      "nodes": [
+        {
+          "id": "appel_d_outre_tombe",
+          "name": "Appel d'outre-tombe",
+          "description": "Invoque un squelette allié",
+          "trigger": { "family": "power" },
+          "effects": [
+            {
+              "type": "ability",
+              "action": "summon_ally",
+              "entity": "minecraft:skeleton",
+              "lifetime_ticks": 1200,
+              "cooldown_ticks": 2400,
+              "scale": 1.0,
+              "health_bonus": 0,
+              "damage_bonus": 0
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 30,
+      "exclusive": true,
+      "nodes": [
+        {
+          "id": "armure_de_l_oubli",
+          "name": "Armure de l'oubli",
+          "description": "1 EPF permanent, soit environ 4 % de réduction",
+          "effects": [ { "type": "flag", "flag": "bonus_epf", "value": 1 } ]
+        },
+        {
+          "id": "armure_spectrale",
+          "name": "Armure spectrale",
+          "description": "Équivalent fer après la mort, jusqu'à récupération du corps",
+          "trigger": { "family": "reflex", "on": "respawn" },
+          "effects": [
+            {
+              "type": "ability",
+              "action": "spectral_armour",
+              "armour_points": 15,
+              "armour_toughness": 0,
+              "ends_on": "corpse_emptied",
+              "max_active_seconds": 600,
+              "cooldown_ticks": 0
+            },
+            { "type": "appearance", "layer": "armour_glint_only", "while": "spectral_armour_active" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 40,
+      "nodes": [
+        {
+          "id": "pacte",
+          "name": "Pacte",
+          "description": "Les morts-vivants n'attaquent plus",
+          "effects": [
+            { "type": "flag", "flag": "ignored_by", "entity_tag": "minecraft:undead" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 45,
+      "nodes": [
+        {
+          "id": "ossuaire",
+          "name": "Ossuaire",
+          "description": "Le squelette devient plus grand, plus résistant, plus dangereux",
+          "requires_node": "appel_d_outre_tombe",
+          "effects": [
+            {
+              "type": "ability",
+              "action": "summon_ally",
+              "overrides": "appel_d_outre_tombe",
+              "scale": 1.4,
+              "health_bonus": 20,
+              "damage_bonus": 3
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "resurrection",
+          "name": "Résurrection",
+          "description": "Revient sur place au lieu de réapparaître",
+          "trigger": { "family": "reflex", "on": "death" },
+          "effects": [
+            { "type": "ability", "action": "revive_in_place", "cooldown_ticks": 36000 }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "branches": [
+    {
+      "id": "os_rompus", "name": "Os rompus", "cause": "chute", "threshold": 10,
+      "description": "Dégâts de chute réduits de moitié",
+      "effects": [ { "type": "damage_taken", "multiplier": 0.5, "when": { "damage_type": "minecraft:fall" } } ]
+    },
+    {
+      "id": "atterrissage", "name": "Atterrissage", "cause": "chute", "threshold": 25,
+      "description": "Aucun dégât de chute sous 10 blocs",
+      "effects": [ { "type": "fall_distance", "subtract_blocks": 7 } ]
+    },
+    {
+      "id": "rattrapage", "name": "Rattrapage", "cause": "vide", "threshold": 5,
+      "description": "Les objets sont déposés sur le dernier bloc solide touché",
+      "effects": [ { "type": "flag", "flag": "void_drop_rescue" } ]
+    },
+    {
+      "id": "pas_dans_le_vide", "name": "Pas dans le vide", "cause": "vide", "threshold": 15,
+      "description": "Sous la limite du monde, replacé sur le dernier bloc solide",
+      "trigger": { "family": "reflex", "on": "below_world_limit" },
+      "effects": [ { "type": "ability", "action": "void_catch", "cooldown_ticks": 36000 } ]
+    },
+    {
+      "id": "peau_de_cendre", "name": "Peau de cendre", "cause": "brule", "threshold": 10,
+      "description": "Résistance au feu",
+      "effects": [ { "type": "damage_taken", "multiplier": 0.5, "when": { "damage_type_tag": "minecraft:is_fire" } } ]
+    },
+    {
+      "id": "ne_des_flammes", "name": "Né des flammes", "cause": "brule", "threshold": 25,
+      "description": "Immunité à la lave pendant 10 s, et assombrit durablement la peau",
+      "effects": [
+        { "type": "ability", "action": "lava_immunity", "duration_ticks": 200, "cooldown_ticks": 1200 },
+        { "type": "appearance", "layer": "ash_skin", "permanent": true }
+      ]
+    },
+    {
+      "id": "poumons_morts", "name": "Poumons morts", "cause": "noyade", "threshold": 10,
+      "description": "Apnée doublée",
+      "effects": [ { "type": "air", "reserve_multiplier": 2.0 } ]
+    },
+    {
+      "id": "nemesis_creeper", "name": "Némésis — creeper", "cause": "creeper", "threshold": 15,
+      "description": "+15 % de dégâts contre les creepers",
+      "effects": [
+        { "type": "damage_dealt", "multiplier": 1.15, "when": { "entity_type": "minecraft:creeper" } }
+      ]
+    }
+  ],
+
+  "appearances": [
+    { "at_level": 10, "layer": "pale_skin" },
+    { "at_level": 20, "layer": "scars" },
+    { "at_level": 40, "layer": "red_aura", "intensity": 0.5 },
+    { "at_level": 50, "layer": "red_aura", "intensity": 1.0 }
+  ]
+}

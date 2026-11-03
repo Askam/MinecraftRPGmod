@@ -1,0 +1,4 @@
+{
+  "priority": 25,
+  "killer_types": ["minecraft:player"]
+}

@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "id": "minage",
+  "name": "Minage",
+  "color": "#8a9ba8",
+  "max_level": 50,
+  "xp_curve": { "base": 60, "exponent": 1.15 },
+  "xp_sources": [
+    { "on": "break_block", "filter": "#forge:ores", "xp": 6 },
+    { "on": "break_block", "filter": "#minecraft:base_stone_overworld", "xp": 1 },
+    { "on": "break_block", "filter": "#forge:ores/diamond", "xp": 25 }
+  ],
+  "tiers": [
+    {
+      "level": 5,
+      "nodes": [
+        {
+          "id": "main_sure", "name": "Main sûre",
+          "description": "Vitesse de pioche +10 %",
+          "effects": [
+            { "type": "flag", "flag": "dig_speed", "multiplier": 1.1, "tool": "#minecraft:pickaxes" }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 10, "exclusive": true,
+      "nodes": [
+        {
+          "id": "oeil_du_mineur", "name": "Œil du mineur",
+          "description": "Les minerais à moins de 5 blocs scintillent 2 s après un coup de pioche",
+          "trigger": { "family": "reflex", "on": "break_block", "require": { "filter": "#minecraft:base_stone_overworld" } },
+          "effects": [
+            { "type": "flag", "flag": "ore_highlight", "radius": 5, "duration_ticks": 40 }
+          ]
+        },
+        {
+          "id": "veine_riche", "name": "Veine riche",
+          "description": "10 % de chance de double butin sur les minerais",
+          "effects": [
+            { "type": "drop_bonus", "filter": "#forge:ores", "chance": 0.1, "extra": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 20,
+      "nodes": [
+        {
+          "id": "veinage", "name": "Veinage",
+          "description": "Casse d'un coup les blocs du même minerai qui se touchent, jusqu'à 8",
+          "trigger": { "family": "hold" },
+          "effects": [
+            {
+              "type": "break_shape", "shape": "vein", "max_blocks": 8,
+              "filter": "#forge:ores", "same_block_only": true,
+              "stamina_per_block": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 35, "exclusive": true,
+      "nodes": [
+        {
+          "id": "fonte", "name": "Fonte",
+          "description": "Fer et cuivre tombent déjà fondus",
+          "effects": [
+            { "type": "flag", "flag": "auto_smelt", "filter": ["#forge:ores/iron", "#forge:ores/copper"] }
+          ]
+        },
+        {
+          "id": "carrier", "name": "Carrier",
+          "description": "La pioche creuse une colonne de 3 blocs de haut",
+          "trigger": { "family": "hold" },
+          "effects": [
+            {
+              "type": "break_shape", "shape": "column", "max_blocks": 3,
+              "filter": "#minecraft:base_stone_overworld",
+              "stamina_per_block": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 50,
+      "nodes": [
+        {
+          "id": "prospection", "name": "Prospection",
+          "description": "Marque la plus grosse veine dans 32 blocs",
+          "trigger": { "family": "power" },
+          "effects": [
+            {
+              "type": "ability", "action": "mark_richest_vein",
+              "radius": 32, "filter": "#forge:ores",
+              "marker_duration_ticks": 600, "cooldown_ticks": 3600
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
