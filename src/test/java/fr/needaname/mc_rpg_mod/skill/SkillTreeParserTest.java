@@ -114,6 +114,20 @@ class SkillTreeParserTest {
     }
 
     @Test
+    void breakShapeValidShapeAccepted() {
+        String json = VALID.replace("{ \"type\": \"flag\", \"flag\": \"x\" }",
+                "{ \"type\": \"break_shape\", \"shape\": \"column\", \"max_blocks\": 3 }");
+        assertEquals("test", parse(json).id());
+    }
+
+    @Test
+    void breakShapeUnknownShapeRefused() {
+        String json = VALID.replace("{ \"type\": \"flag\", \"flag\": \"x\" }",
+                "{ \"type\": \"break_shape\", \"shape\": \"sphere\", \"max_blocks\": 3 }");
+        assertTrue(refuse(json).getMessage().contains("shape inconnue 'sphere'"));
+    }
+
+    @Test
     void badAttributeOperationIsRefused() {
         String json = VALID.replace("\"operation\": \"addition\"", "\"operation\": \"nope\"");
         assertTrue(refuse(json).getMessage().contains("operation invalide 'nope'"));

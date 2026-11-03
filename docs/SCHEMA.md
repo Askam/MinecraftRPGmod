@@ -67,7 +67,7 @@ correspond à un seul chemin de code.
 | `damage_dealt` | `multiplier`, `when` | Dégâts infligés, filtrés par entité, tag, ou vie restante de la cible. |
 | `fall_distance` | `subtract_blocks` | Retire des blocs au compteur avant le calcul vanilla, qui en retire déjà 3. |
 | `drop_bonus` | `filter`, `chance`, `extra`, `item`? | Butin supplémentaire sur un tag de blocs. `item` fait tomber autre chose que le bloc lui-même — la résine de Sève. |
-| `break_shape` | `shape`, `max_blocks`, `filter`, `stamina_per_block` | `vein`, `tree`, `area`. Le cœur de Veinage, Abattage et Moisson. |
+| `break_shape` | `shape`, `max_blocks`, `filter`, `stamina_per_block`, `size`? | Formes : `vein` et `tree` (remplissage par contiguïté, 26-voisinage, borné par `max_blocks`), `area` (boîte `size: [x,y,z]` centrée horizontalement sur l'origine), `column` (colonne verticale vers le haut, hauteur `max_blocks`). Le cœur de Veinage, Abattage, Moisson et Carrier. |
 | `breeding` | `table` | Table de poids : `[{ weight, children }]`. |
 | `air` | `reserve_multiplier`, `regen_ticks_per_bubble`, `drown_delay_ticks`, `drown_multiplier` | Tout ce qui touche à l'apnée. |
 | `ability` | `action`, `cooldown_ticks`, + paramètres | Une action nommée. `cooldown_ticks` à 0 = pas de recharge. Avec `overrides: "<id de nœud>"`, l'effet ne fait que corriger des champs de celui-là et hérite du reste — c'est ainsi qu'Ossuaire améliore le squelette sans redire la recharge. |

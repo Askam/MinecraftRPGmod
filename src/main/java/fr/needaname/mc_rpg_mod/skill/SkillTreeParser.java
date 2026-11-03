@@ -37,6 +37,7 @@ import java.util.Set;
 public final class SkillTreeParser {
     private static final int SUPPORTED_SCHEMA = 1;
     private static final int DEFAULT_MAX_LEVEL = 50;
+    private static final Set<String> BREAK_SHAPES = Set.of("vein", "tree", "area", "column");
 
     private SkillTreeParser() {
     }
@@ -284,6 +285,12 @@ public final class SkillTreeParser {
             // Un effet qui en corrige un autre (overrides) hérite des champs qu'il ne redit pas, cooldown compris.
             if (type == EffectType.ABILITY && !e.has("cooldown_ticks") && !e.has("overrides")) {
                 throw err(file, effectWhere, "ability sans cooldown_ticks (mettre 0 si aucune)");
+            }
+            if (type == EffectType.BREAK_SHAPE) {
+                String shape = reqString(file, effectWhere, e, "shape");
+                if (!BREAK_SHAPES.contains(shape)) {
+                    throw err(file, effectWhere, "shape inconnue '" + shape + "' (vein, tree, area, column)");
+                }
             }
             effects.add(new Effect(type, e));
         }

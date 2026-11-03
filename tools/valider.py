@@ -18,6 +18,7 @@ EFFETS = {
 }
 FAMILLES = {"reflex", "hold", "power"}
 OPERATIONS = {"addition", "multiply_base", "multiply_total"}
+FORMES = {"vein", "tree", "area", "column"}
 RACINE = {"schema", "id", "name", "color", "max_level", "xp_curve", "tiers"}
 CLES_MORT = {"xp_on_death", "counters", "branches", "appearances"}
 
@@ -51,6 +52,8 @@ def valider(chemin):
                 err(f"{ou} : type d'effet inconnu {t!r}")
             if t == "attribute" and e.get("operation") not in OPERATIONS:
                 err(f"{ou} : operation invalide {e.get('operation')!r}")
+            if t == "break_shape" and e.get("shape") not in FORMES:
+                err(f"{ou} : shape invalide {e.get('shape')!r}")
             # Un effet qui en corrige un autre hérite des champs qu'il ne redit pas.
             if t == "ability" and "cooldown_ticks" not in e and "overrides" not in e:
                 err(f"{ou} : ability sans cooldown_ticks (mettre 0 si aucune)")
