@@ -37,6 +37,18 @@ public class DeathStats {
         byCause.merge(cause, 1, Integer::sum);
     }
 
+    /** Fixe le compteur d'une cause (commande d'administration) et ajuste le total du même écart. */
+    public void setCount(String cause, int count) {
+        int previous = byCause.getOrDefault(cause, 0);
+        int clamped = Math.max(0, count);
+        if (clamped == 0) {
+            byCause.remove(cause);
+        } else {
+            byCause.put(cause, clamped);
+        }
+        total = Math.max(0, total + (clamped - previous));
+    }
+
     public int getTotal() {
         return total;
     }
@@ -47,6 +59,12 @@ public class DeathStats {
 
     public Map<String, Integer> getAll() {
         return Collections.unmodifiableMap(byCause);
+    }
+
+    /** Efface tous les compteurs (commande reset). */
+    public void reset() {
+        byCause.clear();
+        total = 0;
     }
 
     public void copyFrom(DeathStats other) {

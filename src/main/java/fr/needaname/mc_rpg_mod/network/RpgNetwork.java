@@ -11,8 +11,13 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class RpgNetwork {
     // À incrémenter à chaque changement de format d'un paquet : un client désynchronisé sera refusé à la connexion.
-    // v2 : ajout de SyncSkillsPacket (serveur→client) et des paquets client→serveur HoldKey et TriggerPower.
-    private static final String PROTOCOL_VERSION = "2";
+    // v2 : SyncSkillsPacket + HoldKeyPacket + TriggerPowerPacket.
+    // v3 : SyncCategoriesPacket et OpenAdminPacket (état des catégories).
+    // v4 : SyncSkillTreesPacket (barèmes serveur → client).
+    // v5 : ClientReflexPacket (gestes client_* → serveur).
+    // v6 : ChooseNodePacket, AssignPowerPacket, SetCategoryPacket (intentions des écrans → serveur).
+    // v7 : SyncAppearancePacket (drapeaux d'apparence → observateurs).
+    private static final String PROTOCOL_VERSION = "7";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(RpgMod.MODID, "main"),
@@ -41,6 +46,46 @@ public final class RpgNetwork {
                 .encoder(TriggerPowerPacket::encode)
                 .decoder(TriggerPowerPacket::decode)
                 .consumerMainThread(TriggerPowerPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncCategoriesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncCategoriesPacket::encode)
+                .decoder(SyncCategoriesPacket::decode)
+                .consumerMainThread(SyncCategoriesPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(OpenAdminPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenAdminPacket::encode)
+                .decoder(OpenAdminPacket::decode)
+                .consumerMainThread(OpenAdminPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncSkillTreesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncSkillTreesPacket::encode)
+                .decoder(SyncSkillTreesPacket::decode)
+                .consumerMainThread(SyncSkillTreesPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ClientReflexPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ClientReflexPacket::encode)
+                .decoder(ClientReflexPacket::decode)
+                .consumerMainThread(ClientReflexPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ChooseNodePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ChooseNodePacket::encode)
+                .decoder(ChooseNodePacket::decode)
+                .consumerMainThread(ChooseNodePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(AssignPowerPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(AssignPowerPacket::encode)
+                .decoder(AssignPowerPacket::decode)
+                .consumerMainThread(AssignPowerPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SetCategoryPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SetCategoryPacket::encode)
+                .decoder(SetCategoryPacket::decode)
+                .consumerMainThread(SetCategoryPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncAppearancePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncAppearancePacket::encode)
+                .decoder(SyncAppearancePacket::decode)
+                .consumerMainThread(SyncAppearancePacket::handle)
                 .add();
     }
 

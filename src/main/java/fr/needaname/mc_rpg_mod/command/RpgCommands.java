@@ -2,8 +2,6 @@ package fr.needaname.mc_rpg_mod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -16,12 +14,9 @@ import fr.needaname.mc_rpg_mod.effect.server.HoldKeyState;
 import fr.needaname.mc_rpg_mod.effect.server.PowerActivation;
 import fr.needaname.mc_rpg_mod.skill.SkillTreeManager;
 import fr.needaname.mc_rpg_mod.skill.model.Node;
-import fr.needaname.mc_rpg_mod.skill.model.SkillTree;
 import fr.needaname.mc_rpg_mod.skill.model.Tier;
-import fr.needaname.mc_rpg_mod.skill.player.PlayerSkills;
 import fr.needaname.mc_rpg_mod.skill.player.PlayerSkillsProvider;
 import fr.needaname.mc_rpg_mod.skill.player.SkillSyncEvents;
-import fr.needaname.mc_rpg_mod.skill.player.SkillXp;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -30,19 +25,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
- * Commandes du mod. {@code deaths} et {@code skills} sont consultables par tous (pour soi) ; le reste
- * est de l'outillage de test réservé aux ops, en attendant l'écran de compétences et les touches :
- * sans lui, ni les paliers exclusifs ni les pouvoirs ni la touche de maintien ne sont atteignables.
+ * Commandes {@code /mc_rpg_mod}. {@code deaths} est consultable par tous (pour soi) ; {@code node},
+ * {@code slot}, {@code power} et {@code hold} sont de l'outillage de test réservé aux ops, en
+ * attendant l'écran de compétences et les touches (handoff 3) : sans eux, ni les paliers exclusifs,
+ * ni les pouvoirs, ni la touche de maintien ne sont atteignables.
+ *
+ * <p>Les anciennes {@code xp}, {@code level} et {@code skills} ont migré vers {@code /competence}
+ * ({@code xp}, {@code niveau}, {@code info}), pour qu'il n'y ait qu'un seul chemin.
  */
 public final class RpgCommands {
-    private static final SuggestionProvider<CommandSourceStack> TREES = (ctx, builder) ->
-            SharedSuggestionProvider.suggest(SkillTreeManager.INSTANCE.trees().values().stream().map(SkillTree::id), builder);
     private static final SuggestionProvider<CommandSourceStack> NODES = (ctx, builder) ->
             SharedSuggestionProvider.suggest(SkillTreeManager.INSTANCE.trees().values().stream()
                     .flatMap(tree -> tree.tiers().stream())
@@ -60,19 +55,6 @@ public final class RpgCommands {
                         .then(Commands.argument("target", EntityArgument.player())
                                 .requires(source -> source.hasPermission(2))
                                 .executes(ctx -> showDeaths(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))))
-                .then(Commands.literal("skills")
-                        .executes(ctx -> showSkills(ctx.getSource(), ctx.getSource().getPlayerOrException()))
-                        .then(Commands.argument("target", EntityArgument.player())
-                                .requires(source -> source.hasPermission(2))
-                                .executes(ctx -> showSkills(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))))
-                .then(debug("xp")
-                        .then(Commands.argument("tree", StringArgumentType.word()).suggests(TREES)
-                                .then(Commands.argument("amount", LongArgumentType.longArg(1))
-                                        .executes(RpgCommands::grantXp))))
-                .then(debug("level")
-                        .then(Commands.argument("tree", StringArgumentType.word()).suggests(TREES)
-                                .then(Commands.argument("level", IntegerArgumentType.integer(0))
-                                        .executes(RpgCommands::setLevel))))
                 .then(debug("node")
                         .then(Commands.argument("node", StringArgumentType.word()).suggests(NODES)
                                 .executes(RpgCommands::takeNode)))
@@ -119,61 +101,6 @@ public final class RpgCommands {
         return stats.getTotal();
     }
 
-    private static int showSkills(CommandSourceStack source, ServerPlayer target) {
-        PlayerSkills skills = PlayerSkillsProvider.get(target).orElse(null);
-        if (skills == null) {
-            source.sendFailure(Component.literal("Aucune donnée de compétences pour " + target.getGameProfile().getName()));
-            return 0;
-        }
-        source.sendSuccess(() -> Component.literal("Compétences de " + target.getGameProfile().getName() + " :"), false);
-        SkillTreeManager.INSTANCE.trees().values().stream()
-                .sorted(Comparator.comparing(SkillTree::id))
-                .forEach(tree -> {
-                    int level = skills.level(tree.id());
-                    String next = level >= tree.maxLevel() ? "max"
-                            : skills.xp(tree.id()) + "/" + tree.xpCurve().xpForLevel(level + 1);
-                    String nodes = tree.tiers().stream()
-                            .flatMap(tier -> tier.nodes().stream())
-                            .map(Node::id)
-                            .filter(skills::hasNode)
-                            .collect(Collectors.joining(", "));
-                    source.sendSuccess(() -> Component.literal("  " + tree.id() + " : niv. " + level + " (" + next + ")"
-                            + (nodes.isEmpty() ? "" : " · choisis : " + nodes)), false);
-                });
-        if (!skills.powerSlots().isEmpty()) {
-            source.sendSuccess(() -> Component.literal("  Pouvoirs : " + skills.powerSlots()), false);
-        }
-        return 1;
-    }
-
-    private static int grantXp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        SkillTree tree = requireTree(ctx);
-        if (tree == null) {
-            return 0;
-        }
-        long amount = LongArgumentType.getLong(ctx, "amount");
-        SkillXp.grant(player, tree.id(), amount);
-        ctx.getSource().sendSuccess(() -> Component.literal("+" + amount + " XP en " + tree.id()), false);
-        return 1;
-    }
-
-    private static int setLevel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        SkillTree tree = requireTree(ctx);
-        if (tree == null) {
-            return 0;
-        }
-        int level = Math.min(IntegerArgumentType.getInteger(ctx, "level"), tree.maxLevel());
-        PlayerSkillsProvider.get(player).ifPresent(skills -> {
-            skills.setLevel(tree.id(), level);
-            skills.setXp(tree.id(), 0);
-        });
-        refresh(player);
-        ctx.getSource().sendSuccess(() -> Component.literal(tree.id() + " → niveau " + level), false);
-        return 1;
-    }
-
     /** Prend un nœud de palier exclusif, en retirant les autres nœuds du même palier (un seul choix). */
     private static int takeNode(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -205,15 +132,6 @@ public final class RpgCommands {
         SkillSyncEvents.syncTo(player);
         ctx.getSource().sendSuccess(() -> Component.literal("Emplacement " + slot + " → " + nodeId), false);
         return 1;
-    }
-
-    private static SkillTree requireTree(CommandContext<CommandSourceStack> ctx) {
-        String id = StringArgumentType.getString(ctx, "tree");
-        SkillTree tree = SkillTreeManager.INSTANCE.byId(id).orElse(null);
-        if (tree == null) {
-            ctx.getSource().sendFailure(Component.literal("Arbre inconnu : " + id));
-        }
-        return tree;
     }
 
     private static void refresh(ServerPlayer player) {

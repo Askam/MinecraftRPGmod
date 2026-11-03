@@ -1,9 +1,20 @@
 package fr.needaname.mc_rpg_mod.network;
 
+import com.google.gson.JsonParser;
+import fr.needaname.mc_rpg_mod.RpgMod;
+import fr.needaname.mc_rpg_mod.category.CategoryState;
+import fr.needaname.mc_rpg_mod.category.ClientCategoryState;
 import fr.needaname.mc_rpg_mod.death.DeathStats;
+import fr.needaname.mc_rpg_mod.skill.ClientSkillTrees;
+import fr.needaname.mc_rpg_mod.skill.SkillTreeParser;
+import fr.needaname.mc_rpg_mod.skill.model.SkillTree;
 import fr.needaname.mc_rpg_mod.skill.player.PlayerSkillsProvider;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /** Uniquement chargée côté client (via DistExecutor). */
 public final class ClientPacketHandler {
@@ -21,5 +32,33 @@ public final class ClientPacketHandler {
         if (mc.level != null && mc.level.getEntity(packet.entityId()) instanceof Player player) {
             PlayerSkillsProvider.get(player).ifPresent(skills -> skills.load(packet.data()));
         }
+    }
+
+    public static void handleCategories(SyncCategoriesPacket packet) {
+        CompoundTag data = packet.data();
+        Map<String, CategoryState> states = new HashMap<>();
+        for (String treeId : data.getAllKeys()) {
+            states.put(treeId, CategoryState.byId(data.getString(treeId)));
+        }
+        ClientCategoryState.set(states);
+    }
+
+    public static void handleOpenAdmin(OpenAdminPacket packet) {
+        // Ouverture décidée par le serveur (après vérif de permission) ; le client ne fait qu'obéir.
+        Minecraft.getInstance().setScreen(
+                new fr.needaname.mc_rpg_mod.client.screen.AdminScreen(packet.data()));
+    }
+
+    public static void handleSkillTrees(SyncSkillTreesPacket packet) {
+        Map<String, SkillTree> trees = new HashMap<>();
+        packet.raw().forEach((id, json) -> {
+            try {
+                trees.put(id, SkillTreeParser.parse(id, JsonParser.parseString(json).getAsJsonObject()));
+            } catch (RuntimeException ex) {
+                // Couvre SkillLoadException. Le serveur a déjà validé ; on ne plante pas le client si un arbre résiste.
+                RpgMod.LOGGER.error("Barème reçu illisible {} : {}", id, ex.getMessage());
+            }
+        });
+        ClientSkillTrees.set(trees);
     }
 }

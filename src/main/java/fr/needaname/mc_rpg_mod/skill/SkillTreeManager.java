@@ -28,6 +28,8 @@ public class SkillTreeManager extends SimpleJsonResourceReloadListener {
     public static final SkillTreeManager INSTANCE = new SkillTreeManager();
 
     private volatile Map<ResourceLocation, SkillTree> trees = Map.of();
+    /** JSON source de chaque arbre chargé (id de fichier → texte), pour l'envoyer tel quel au client. */
+    private volatile Map<String, String> rawByTreeId = Map.of();
 
     private SkillTreeManager() {
         super(GSON, "competences");
@@ -36,22 +38,30 @@ public class SkillTreeManager extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, SkillTree> loaded = new HashMap<>();
+        Map<String, String> raw = new HashMap<>();
         jsons.forEach((id, json) -> {
             try {
                 if (!json.isJsonObject()) {
                     throw new SkillLoadException(id.getPath() + ".json : racine : objet JSON attendu");
                 }
                 loaded.put(id, SkillTreeParser.parse(id.getPath(), json.getAsJsonObject()));
+                raw.put(id.getPath(), json.toString());
             } catch (SkillLoadException ex) {
                 RpgMod.LOGGER.error("Barème refusé {} : {}", id, ex.getMessage());
             }
         });
         trees = Map.copyOf(loaded);
+        rawByTreeId = Map.copyOf(raw);
         RpgMod.LOGGER.info("Chargé {} arbre(s) de compétences", trees.size());
     }
 
     public Map<ResourceLocation, SkillTree> trees() {
         return trees;
+    }
+
+    /** JSON source des arbres chargés (id → texte), pour la synchro client. */
+    public Map<String, String> rawByTreeId() {
+        return rawByTreeId;
     }
 
     public Optional<SkillTree> byId(String id) {
